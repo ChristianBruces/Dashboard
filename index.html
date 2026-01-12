@@ -4,392 +4,321 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Reino da Barba</title>
-    <!-- SheetJS (xlsx) for Excel/CSV parsing -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <!-- Chart.js for charting -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- Chart.js Datalabels Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <!-- CDN Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
     <style>
-        :root {
-            --bg-color: #f8fafc;
-            --text-color: #1e293b;
-            --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-            --primary-color: #1e3a8a; /* Dark Blue */
-            --secondary-color: #10b981; /* Green */
-            --accent-color: #f97316; /* Orange */
-            --shadow-color: rgba(0, 0, 0, 0.05);
-            --chart-grid-color: #e2e8f0;
-            --chart-text-color: #475569;
-        }
-
-        body.dark-mode {
-            --bg-color: #1e293b;
-            --text-color: #f8fafc;
-            --card-bg: #334155;
-            --border-color: #475569;
-            --primary-color: #60a5fa; /* Light Blue */
-            --secondary-color: #34d399; /* Lighter Green */
-            --accent-color: #fb923c; /* Lighter Orange */
-            --shadow-color: rgba(0, 0, 0, 0.3);
-            --chart-grid-color: #475569;
-            --chart-text-color: #cbd5e1;
-        }
-
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-light: #f8fafc;
+            --bg-dark: #0f172a;
+            --card-light: #ffffff;
+            --card-dark: #1e293b;
+            --text-light: #1e293b;
+            --text-dark: #f1f5f9;
+            --border-light: #e2e8f0;
+            --border-dark: #334155;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            transition: all 0.3s ease;
         }
 
-        .header {
-            background-color: var(--card-bg);
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--border-color);
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            background: var(--card-light);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px var(--shadow-color);
-            z-index: 1000;
+            margin-bottom: 30px;
         }
 
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
+        body.dark-mode header {
+            background: var(--card-dark);
         }
 
-        .theme-toggle {
-            background: none;
+        header h1 {
+            font-size: 28px;
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        button, .file-upload-btn {
+            padding: 10px 20px;
             border: none;
-            font-size: 1.5rem;
+            border-radius: 8px;
             cursor: pointer;
-            color: var(--text-color);
-            transition: color 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
         }
 
-        .theme-toggle:hover {
-            color: var(--primary-color);
+        .btn-primary {
+            background: var(--primary);
+            color: white;
         }
 
-        .dashboard-container {
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        #theme-toggle {
+            background: var(--warning);
+            color: white;
+        }
+
+        /* Filters */
+        .filters-section {
+            background: var(--card-light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .filters-section {
+            background: var(--card-dark);
+        }
+
+        .filters-grid {
             display: grid;
-            grid-template-columns: 280px 1fr;
-            flex-grow: 1;
-            gap: 1.5rem;
-            padding: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
         }
 
-        .sidebar {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 8px var(--shadow-color);
-            overflow-y: auto;
-            max-height: calc(100vh - 120px); /* Adjust based on header height */
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .sidebar h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .filter-group {
-            margin-bottom: 1rem;
-        }
-
-        .filter-group label {
+        .filter-item label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-            color: var(--text-color);
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 14px;
         }
 
-        .filter-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            padding: 0.5rem;
-            border-radius: 4px;
-            background-color: var(--bg-color);
-        }
-
-        .filter-options label {
-            font-weight: normal;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            cursor: pointer;
-            color: var(--text-color);
-        }
-
-        .filter-options input[type="checkbox"] {
-            accent-color: var(--primary-color);
-        }
-
-        .filter-group select,
-        .filter-group input[type="date"] {
+        select, input[type="date"] {
             width: 100%;
-            padding: 0.6rem;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin-top: 0.5rem;
+            padding: 8px 12px;
+            border: 2px solid var(--border-light);
+            border-radius: 6px;
+            background: var(--card-light);
+            color: var(--text-light);
+            font-size: 14px;
         }
 
-        .filter-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
+        body.dark-mode select,
+        body.dark-mode input[type="date"] {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+            border-color: var(--border-dark);
         }
 
-        .filter-actions button {
-            flex: 1;
-            padding: 0.7rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s, color 0.2s;
+        /* KPIs */
+        .kpis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
-        .filter-actions .apply-btn {
-            background-color: var(--primary-color);
-            color: white;
+        .kpi-card {
+            background: var(--card-light);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
         }
 
-        .filter-actions .apply-btn:hover {
-            background-color: #1a2e6b;
+        body.dark-mode .kpi-card {
+            background: var(--card-dark);
         }
 
-        .filter-actions .clear-btn {
-            background-color: var(--border-color);
-            color: var(--text-color);
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
 
-        .filter-actions .clear-btn:hover {
-            background-color: #cbd5e1;
+        .kpi-title {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .active-filters-count {
-            font-size: 0.9rem;
-            color: var(--accent-color);
-            margin-top: 0.5rem;
-            text-align: center;
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
         }
 
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+        .kpi-change {
+            font-size: 14px;
+            font-weight: 600;
         }
 
-        .file-import-section {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px var(--shadow-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
+        .kpi-change.positive {
+            color: var(--success);
         }
 
-        .file-import-section input[type="file"] {
-            display: none;
+        .kpi-change.negative {
+            color: var(--danger);
         }
 
-        .file-import-section label {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-
-        .file-import-section label:hover {
-            background-color: #0d9488;
-        }
-
-        .file-import-message {
-            font-size: 0.9rem;
-            color: var(--text-color);
-        }
-
-        .error-message {
-            color: #ef4444;
-            font-weight: bold;
-            margin-top: 0.5rem;
-            text-align: center;
+        /* Tabs */
+        .tabs-container {
+            margin-bottom: 20px;
         }
 
         .tabs {
             display: flex;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 1rem;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .tab-button {
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            padding: 0.8rem 1.5rem;
+        .tab {
+            padding: 12px 24px;
             border: none;
-            border-bottom: 2px solid transparent;
+            background: var(--card-light);
+            color: var(--text-light);
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
+            font-weight: 600;
             transition: all 0.2s;
         }
 
-        .tab-button:hover {
-            background-color: var(--bg-color);
-            color: var(--primary-color);
+        body.dark-mode .tab {
+            background: var(--card-dark);
+            color: var(--text-dark);
         }
 
-        .tab-button.active {
-            border-bottom-color: var(--primary-color);
-            color: var(--primary-color);
-            background-color: var(--bg-color);
+        .tab.active {
+            background: var(--primary);
+            color: white;
         }
 
         .tab-content {
             display: none;
-            flex-direction: column;
-            gap: 1.5rem;
         }
 
         .tab-content.active {
-            display: flex;
+            display: block;
         }
 
-        .kpi-grid {
+        /* Charts Grid */
+        .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .kpi-card {
-            background-color: var(--card-bg);
-            padding: 1.2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px var(--shadow-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 0.5rem;
-            transition: transform 0.2s;
-        }
-
-        .kpi-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .kpi-card .icon {
-            font-size: 2rem;
-            color: var(--primary-color);
-        }
-
-        .kpi-card .label {
-            font-size: 0.9rem;
-            color: var(--chart-text-color);
-            font-weight: 600;
-        }
-
-        .kpi-card .value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--text-color);
-        }
-
-        .kpi-card .change {
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.2rem;
-        }
-
-        .kpi-card .change.positive {
-            color: var(--secondary-color);
-        }
-
-        .kpi-card .change.negative {
-            color: #ef4444;
-        }
-
-        .chart-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
         }
 
         .chart-container {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px var(--shadow-color);
-            min-height: 350px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            background: var(--card-light);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .chart-container canvas {
-            max-width: 100%;
-            max-height: 100%;
+        body.dark-mode .chart-container {
+            background: var(--card-dark);
         }
 
-        .loading-overlay {
+        .chart-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .chart-title {
+            color: var(--text-dark);
+        }
+
+        /* Heatmap */
+        .heatmap-container {
+            overflow-x: auto;
+        }
+
+        .heatmap-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .heatmap-table th,
+        .heatmap-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+        }
+
+        body.dark-mode .heatmap-table th,
+        body.dark-mode .heatmap-table td {
+            border-color: var(--border-dark);
+        }
+
+        .heatmap-table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Loading & Error */
+        #loading-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0s, opacity 0.3s;
         }
 
-        .loading-overlay.visible {
-            visibility: visible;
-            opacity: 1;
+        #loading-overlay.show {
+            display: flex;
         }
 
         .spinner {
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid var(--primary-color);
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
         }
 
@@ -398,1520 +327,925 @@
             100% { transform: rotate(360deg); }
         }
 
-        .instructions {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
+        .error-message {
+            background: var(--danger);
+            color: white;
+            padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 4px 8px var(--shadow-color);
-            margin-top: 1.5rem;
+            margin-bottom: 20px;
+            display: none;
         }
 
-        .instructions h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
+        .error-message.show {
+            display: block;
         }
 
-        .instructions ul {
-            list-style-type: disc;
-            margin-left: 1.5rem;
-            color: var(--text-color);
-        }
-
-        .instructions li {
-            margin-bottom: 0.5rem;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 1024px) {
-            .dashboard-container {
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-grid {
                 grid-template-columns: 1fr;
             }
-            .sidebar {
-                max-height: none;
-                overflow-y: visible;
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
             }
-            .chart-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
             }
         }
 
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            .dashboard-container {
-                padding: 1rem;
-                gap: 1rem;
-            }
-            .sidebar, .file-import-section, .chart-container, .kpi-card, .instructions {
-                padding: 1rem;
-            }
-            .tabs {
-                flex-wrap: wrap;
-            }
-            .tab-button {
-                flex: 1 1 auto;
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
-            .kpi-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
-            .kpi-card .value {
-                font-size: 1.5rem;
-            }
+        /* Hide file input */
+        #file-input {
+            display: none;
+        }
+
+        .file-stats {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="loading-overlay" id="loadingOverlay">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
         <div class="spinner"></div>
     </div>
 
-    <header class="header">
-        <h1>Dashboard Reino da Barba</h1>
-        <button id="themeToggle" class="theme-toggle">☀️</button>
-    </header>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>💈 Dashboard Reino da Barba</h1>
+            <div class="header-actions">
+                <button id="theme-toggle">🌙 Modo Escuro</button>
+                <button class="btn-primary" onclick="document.getElementById('file-input').click()">
+                    📁 Carregar Arquivo
+                </button>
+                <input type="file" id="file-input" accept=".xlsx,.xls,.csv">
+            </div>
+        </header>
 
-    <div class="dashboard-container">
-        <aside class="sidebar">
-            <h3>Importar Dados</h3>
-            <div class="file-import-section">
-                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
-                <label for="fileInput">Carregar Arquivo Excel/CSV</label>
-                <div id="fileImportMessage" class="file-import-message">Nenhum arquivo carregado.</div>
-                <div id="errorMessage" class="error-message"></div>
-            </div>
+        <!-- Error Message -->
+        <div id="error-message" class="error-message"></div>
 
-            <h3>Filtros</h3>
-            <div class="filter-group">
-                <label>Ano:</label>
-                <div id="yearFilterOptions" class="filter-options"></div>
-            </div>
-            <div class="filter-group">
-                <label>Mês:</label>
-                <div id="monthFilterOptions" class="filter-options"></div>
-            </div>
-            <div class="filter-group">
-                <label for="quinzenaFilter">Quinzena:</label>
-                <select id="quinzenaFilter">
-                    <option value="Todas">Todas</option>
-                    <option value="1ª">1ª Quinzena</option>
-                    <option value="2ª">2ª Quinzena</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Dia da Semana:</label>
-                <div id="dayOfWeekFilterOptions" class="filter-options"></div>
-            </div>
-            <div class="filter-group">
-                <label>Tipo de Serviço:</label>
-                <div id="serviceTypeFilterOptions" class="filter-options"></div>
-            </div>
-            <div class="filter-group">
-                <label>Forma de Pagamento:</label>
-                <div id="paymentMethodFilterOptions" class="filter-options"></div>
-            </div>
-            <div class="filter-group">
-                <label>Período Personalizado:</label>
-                <input type="date" id="startDateFilter">
-                <input type="date" id="endDateFilter">
-            </div>
-            <div class="filter-actions">
-                <button class="apply-btn" id="applyFiltersBtn">Aplicar Filtros</button>
-                <button class="clear-btn" id="clearFiltersBtn">Limpar Filtros</button>
-            </div>
-            <div id="activeFiltersCount" class="active-filters-count">0 filtros ativos</div>
-        </aside>
+        <!-- File Stats -->
+        <div id="file-stats" class="file-stats" style="display:none;"></div>
 
-        <main class="main-content">
+        <!-- Filters -->
+        <div class="filters-section">
+            <h3>🎛️ Filtros</h3>
+            <div class="filters-grid">
+                <div class="filter-item">
+                    <label>Ano</label>
+                    <select id="filter-ano" multiple></select>
+                </div>
+                <div class="filter-item">
+                    <label>Mês</label>
+                    <select id="filter-mes" multiple></select>
+                </div>
+                <div class="filter-item">
+                    <label>Quinzena</label>
+                    <select id="filter-quinzena" multiple></select>
+                </div>
+                <div class="filter-item">
+                    <label>Dia da Semana</label>
+                    <select id="filter-dia-semana" multiple></select>
+                </div>
+                <div class="filter-item">
+                    <label>Serviço</label>
+                    <select id="filter-servico" multiple></select>
+                </div>
+                <div class="filter-item">
+                    <label>Forma de Pagamento</label>
+                    <select id="filter-pagto" multiple></select>
+                </div>
+                <div class="filter-item">
+                    <label>Data Início</label>
+                    <input type="date" id="filter-data-inicio">
+                </div>
+                <div class="filter-item">
+                    <label>Data Fim</label>
+                    <input type="date" id="filter-data-fim">
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <button class="btn-primary" onclick="applyFilters()">Aplicar Filtros</button>
+                <button onclick="clearFilters()">Limpar Filtros</button>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpis-grid" id="kpis-container"></div>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
             <div class="tabs">
-                <button class="tab-button active" data-tab="executiva">Visão Executiva</button>
-                <button class="tab-button" data-tab="operacional">Análise Operacional</button>
-                <button class="tab-button" data-tab="clientes">Análise de Clientes</button>
-                <button class="tab-button" data-tab="financeira">Análise Financeira</button>
+                <button class="tab active" data-tab="executiva">📊 Visão Executiva</button>
+                <button class="tab" data-tab="operacional">⚙️ Análise Operacional</button>
+                <button class="tab" data-tab="clientes">👥 Análise de Clientes</button>
+                <button class="tab" data-tab="financeira">💰 Análise Financeira</button>
             </div>
+        </div>
 
-            <div id="executiva" class="tab-content active">
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <span class="icon">💰</span>
-                        <div class="label">Faturamento Total</div>
-                        <div class="value" id="kpiTotalRevenue">R$ 0,00</div>
-                        <div class="change" id="kpiRevenueChange"></div>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="icon">💸</span>
-                        <div class="label">Ticket Médio</div>
-                        <div class="value" id="kpiAverageTicket">R$ 0,00</div>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="icon">👥</span>
-                        <div class="label">Clientes Atendidos</div>
-                        <div class="value" id="kpiTotalClients">0</div>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="icon">🎯</span>
-                        <div class="label">Atingimento da Meta</div>
-                        <div class="value" id="kpiGoalAchievement">0%</div>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="icon">👨‍💼</span>
-                        <div class="label">Comissão Jean</div>
-                        <div class="value" id="kpiJeanCommission">R$ 0,00</div>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="icon">💈</span>
-                        <div class="label">Comissão Reino da Barba</div>
-                        <div class="value" id="kpiReinoCommission">R$ 0,00</div>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="icon">📈</span>
-                        <div class="label">Crescimento MoM</div>
-                        <div class="value" id="kpiMoMGrowth">0%</div>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="icon">🗓️</span>
-                        <div class="label">Serviços/Dia (Média)</div>
-                        <div class="value" id="kpiAvgServicesPerDay">0</div>
-                    </div>
+        <!-- Tab Contents -->
+        <div id="tab-executiva" class="tab-content active">
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3 class="chart-title">Faturamento Mensal vs Meta</h3>
+                    <canvas id="chart-revenue-goal"></canvas>
                 </div>
-                <div class="chart-grid">
-                    <div class="chart-container"><canvas id="monthlyRevenueChart"></canvas></div>
-                    <div class="chart-container"><canvas id="goalAchievementChart"></canvas></div>
-                    <div class="chart-container"><canvas id="serviceMixChart"></canvas></div>
-                    <div class="chart-container"><canvas id="top5ClientsChart"></canvas></div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Atingimento de Meta</h3>
+                    <canvas id="chart-goal-gauge"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Mix de Serviços</h3>
+                    <canvas id="chart-services-mix"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Top 10 Clientes</h3>
+                    <canvas id="chart-top-clients"></canvas>
                 </div>
             </div>
+        </div>
 
-            <div id="operacional" class="tab-content">
-                <div class="chart-grid">
-                    <div class="chart-container"><canvas id="revenueByDayOfWeekChart"></canvas></div>
-                    <div class="chart-container"><canvas id="dailyProductivityChart"></canvas></div>
-                    <div class="chart-container"><canvas id="servicesHeatmapChart"></canvas></div>
-                    <div class="chart-container"><canvas id="paymentMethodsChart"></canvas></div>
-                    <div class="chart-container"><canvas id="avgTicketByServiceChart"></canvas></div>
-                    <div class="chart-container"><canvas id="revenueByFortnightChart"></canvas></div>
+        <div id="tab-operacional" class="tab-content">
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3 class="chart-title">Receita por Dia da Semana</h3>
+                    <canvas id="chart-revenue-day-week"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Produtividade Diária</h3>
+                    <canvas id="chart-daily-productivity"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Heatmap de Serviços</h3>
+                    <div class="heatmap-container" id="heatmap-services"></div>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Formas de Pagamento</h3>
+                    <canvas id="chart-payment-methods"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Ticket Médio por Serviço</h3>
+                    <canvas id="chart-avg-ticket"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Receita por Quinzena</h3>
+                    <canvas id="chart-revenue-fortnight"></canvas>
                 </div>
             </div>
+        </div>
 
-            <div id="clientes" class="tab-content">
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <span class="icon">🔄</span>
-                        <div class="label">Taxa de Retenção</div>
-                        <div class="value" id="kpiRetentionRate">0%</div>
-                    </div>
+        <div id="tab-clientes" class="tab-content">
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3 class="chart-title">Frequência de Clientes</h3>
+                    <canvas id="chart-client-frequency"></canvas>
                 </div>
-                <div class="chart-grid">
-                    <div class="chart-container"><canvas id="top10ClientsChart"></canvas></div>
-                    <div class="chart-container"><canvas id="clientFrequencyChart"></canvas></div>
-                    <div class="chart-container"><canvas id="newRecurringClientsChart"></canvas></div>
-                    <div class="chart-container"><canvas id="paretoChart"></canvas></div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Novos vs Recorrentes</h3>
+                    <canvas id="chart-new-recurring"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Curva ABC (Pareto)</h3>
+                    <canvas id="chart-pareto"></canvas>
                 </div>
             </div>
+        </div>
 
-            <div id="financeira" class="tab-content">
-                <div class="chart-grid">
-                    <div class="chart-container"><canvas id="paymentMethodsEvolutionChart"></canvas></div>
-                    <div class="chart-container"><canvas id="commissionDistributionChart"></canvas></div>
-                    <div class="chart-container"><canvas id="goalGapWaterfallChart"></canvas></div>
-                    <div class="chart-container"><canvas id="seasonalityChart"></canvas></div>
-                    <div class="chart-container"><canvas id="yoyComparisonChart"></canvas></div>
+        <div id="tab-financeira" class="tab-content">
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3 class="chart-title">Evolução de Pagamentos</h3>
+                    <canvas id="chart-payment-evolution"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Distribuição de Comissões</h3>
+                    <canvas id="chart-commissions"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Gap de Meta</h3>
+                    <canvas id="chart-goal-gap"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Sazonalidade com Média Móvel</h3>
+                    <canvas id="chart-seasonality"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Comparação Ano a Ano</h3>
+                    <canvas id="chart-yoy"></canvas>
                 </div>
             </div>
-
-            <div class="instructions">
-                <h3>Instruções de Uso</h3>
-                <ul>
-                    <li><strong>1. Carregar Arquivo:</strong> Clique em "Carregar Arquivo Excel/CSV" e selecione sua base de dados. O arquivo deve conter as seguintes colunas: `Ano`, `Mês`, `Dia`, `Dia da Semana`, `Quinzena`, `Nome`, `Tipo de Serviço`, `Valor`, `Forma de Pagamento`, `Comissão Jean`, `Comissão Reino da Barba`, `Meta Mensal`, `Meta de Clientes`.</li>
-                    <li><strong>2. Aplicar Filtros:</strong> Use os filtros na barra lateral para refinar os dados. Selecione anos, meses, dias da semana, tipos de serviço, formas de pagamento ou um período personalizado. Clique em "Aplicar Filtros" para atualizar o dashboard.</li>
-                    <li><strong>3. Navegar entre Abas:</strong> Utilize as abas (Visão Executiva, Análise Operacional, etc.) para explorar diferentes aspectos do negócio.</li>
-                    <li><strong>4. Modo Escuro/Claro:</strong> Clique no ícone de sol/lua no cabeçalho para alternar entre os modos de visualização.</li>
-                    <li><strong>5. Interatividade:</strong> Passe o mouse sobre os gráficos para ver detalhes nos tooltips.</li>
-                </ul>
-            </div>
-        </main>
+        </div>
     </div>
 
     <script>
-        Chart.register(ChartDataLabels); // Register the datalabels plugin
-
+        // Global Variables
         let rawData = [];
         let filteredData = [];
-        let goalsData = {}; // Stores monthly goals from rawData
-        let charts = {}; // Object to hold all Chart.js instances
-        let currentTheme = localStorage.getItem('theme') || 'light';
-        const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-        const fullMonthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-        const dayOfWeekNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-        const fullDayOfWeekNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
-
-        const requiredColumns = [
-            "Ano", "Mês", "Dia", "Dia da Semana", "Quinzena", "Nome", "Tipo de Serviço",
-            "Valor", "Forma de Pagamento", "Comissão Jean", "Comissão Reino da Barba",
-            "Meta Mensal", "Meta de Clientes"
-        ];
-
-        // --- Utility Functions ---
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-        }
-
-        function formatPercentage(value) {
-            return new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value / 100);
-        }
-
-        function getMonthName(monthIndex) {
-            return monthNames[monthIndex - 1]; // Mês is 1-indexed
-        }
-
-        function getFullMonthName(monthIndex) {
-            return fullMonthNames[monthIndex - 1];
-        }
-
-        function getWeekDayName(dayIndex) {
-            return dayOfWeekNames[dayIndex]; // Dia da Semana is 0-indexed (Sunday=0)
-        }
-
-        function getFullWeekDayName(dayIndex) {
-            return fullDayOfWeekNames[dayIndex];
-        }
-
-        function parseDate(year, month, day) {
-            // Ensure month is 1-indexed for Date constructor
-            return new Date(year, month - 1, day);
-        }
-
-        function calculateMoMChange(current, previous) {
-            if (previous === 0) return current > 0 ? 100 : 0; // Infinite growth if prev was 0 and current > 0
-            return ((current - previous) / previous) * 100;
-        }
-
-        function showLoadingSpinner() {
-            document.getElementById('loadingOverlay').classList.add('visible');
-        }
-
-        function hideLoadingSpinner() {
-            document.getElementById('loadingOverlay').classList.remove('visible');
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        function clearError() {
-            document.getElementById('errorMessage').textContent = '';
-            document.getElementById('errorMessage').style.display = 'none';
-        }
-
-        function destroyCharts() {
-            for (const chartId in charts) {
-                if (charts[chartId]) {
-                    charts[chartId].destroy();
-                    charts[chartId] = null;
-                }
-            }
-        }
-
-        function getChartColors(index) {
-            const colors = [
-                '#1e3a8a', '#10b981', '#f97316', '#ef4444', '#6366f1', '#06b6d4', '#f59e0b', '#8b5cf6',
-                '#be123c', '#059669', '#db2777', '#7c3aed', '#ca8a04', '#dc2626', '#2563eb', '#ea580c'
-            ];
-            return colors[index % colors.length];
-        }
-
-        function getChartBorderColors(index) {
-            const colors = [
-                '#172b6b', '#0c8a61', '#d45e0f', '#c23333', '#4f52cc', '#048a9f', '#c47c08', '#6d42d0',
-                '#9e0f2c', '#03704f', '#b31f60', '#612dbd', '#a36d03', '#b31f1f', '#1d4ed8', '#c2410c'
-            ];
-            return colors[index % colors.length];
-        }
-
-        // --- Theme Toggle ---
-        function applyTheme(theme) {
-            document.body.classList.toggle('dark-mode', theme === 'dark');
-            document.getElementById('themeToggle').textContent = theme === 'dark' ? '🌙' : '☀️';
-            localStorage.setItem('theme', theme);
-            currentTheme = theme;
-            // Re-render charts to apply new theme colors
+        let charts = {};
+        
+        // Theme Toggle
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            this.textContent = isDark ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            // Recreate charts with new theme
             if (rawData.length > 0) {
-                renderDashboard();
+                createAllCharts();
             }
-        }
-
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
 
-        // Initial theme application
-        applyTheme(currentTheme);
+        // Load theme from localStorage
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-toggle').textContent = '☀️ Modo Claro';
+        }
 
-        // --- Data Processing ---
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) {
-                return;
-            }
+        // Tab Switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            });
+        });
 
-            showLoadingSpinner();
-            clearError();
-            document.getElementById('fileImportMessage').textContent = `Carregando ${file.name}...`;
-
+        // File Upload
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            document.getElementById('loading-overlay').classList.add('show');
+            document.getElementById('error-message').classList.remove('show');
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet);
-
-                    if (json.length === 0) {
-                        throw new Error("O arquivo está vazio ou não contém dados válidos.");
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    rawData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    if (rawData.length === 0) {
+                        throw new Error('O arquivo está vazio!');
                     }
-
-                    // Validate columns
-                    const actualColumns = Object.keys(json[0]);
-                    const missingColumns = requiredColumns.filter(col => !actualColumns.includes(col));
-                    if (missingColumns.length > 0) {
-                        throw new Error(`Colunas obrigatórias ausentes: ${missingColumns.join(', ')}. Verifique o cabeçalho do seu arquivo.`);
+                    
+                    // Validate required columns
+                    const required = ['ano', 'mes', 'dia', 'dia_semana', 'quinzenas', 'cliente', 'servico', 'valor', 'pagto'];
+                    const cols = Object.keys(rawData[0]);
+                    const missing = required.filter(col => !cols.includes(col));
+                    if (missing.length > 0) {
+                        throw new Error(`Colunas obrigatórias não encontradas: ${missing.join(', ')}`);
                     }
-
-                    rawData = json.map(row => {
-                        // Ensure numeric values are parsed correctly
-                        row.Valor = parseFloat(String(row.Valor).replace(',', '.')) || 0;
-                        row['Comissão Jean'] = parseFloat(String(row['Comissão Jean']).replace(',', '.')) || 0;
-                        row['Comissão Reino da Barba'] = parseFloat(String(row['Comissão Reino da Barba']).replace(',', '.')) || 0;
-                        row['Meta Mensal'] = parseFloat(String(row['Meta Mensal']).replace(',', '.')) || 0;
-                        row['Meta de Clientes'] = parseInt(row['Meta de Clientes']) || 0;
-                        row.Ano = parseInt(row.Ano) || 0;
-                        row.Mês = parseInt(row.Mês) || 0;
-                        row.Dia = parseInt(row.Dia) || 0;
-
-                        // Add a full date object for easier filtering
-                        row.FullDate = parseDate(row.Ano, row.Mês, row.Dia);
-                        return row;
-                    });
-
-                    // Extract goals data
-                    goalsData = {};
-                    rawData.forEach(row => {
-                        const key = `${row.Ano}-${row.Mês}`;
-                        if (!goalsData[key]) {
-                            goalsData[key] = {
-                                metaMensal: row['Meta Mensal'],
-                                metaClientes: row['Meta de Clientes']
-                            };
-                        }
-                    });
-
-                    document.getElementById('fileImportMessage').textContent = `Arquivo "${file.name}" carregado com sucesso! ${rawData.length} registros encontrados.`;
-                    populateFilterOptions();
-                    applyFilters(); // Initial render with all data
+                    
+                    // Show file stats
+                    document.getElementById('file-stats').style.display = 'block';
+                    document.getElementById('file-stats').innerHTML = `
+                        ✅ Arquivo carregado: <strong>${file.name}</strong> | 
+                        ${rawData.length} registros | 
+                        ${cols.length} colunas
+                    `;
+                    
+                    filteredData = [...rawData];
+                    populateFilters();
+                    updateDashboard();
                 } catch (error) {
-                    showError(`Erro ao processar arquivo: ${error.message}`);
-                    document.getElementById('fileImportMessage').textContent = `Falha ao carregar arquivo.`;
-                    rawData = []; // Clear data on error
+                    showError(error.message);
                 } finally {
-                    hideLoadingSpinner();
+                    document.getElementById('loading-overlay').classList.remove('show');
                 }
             };
             reader.readAsArrayBuffer(file);
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = '❌ Erro: ' + message;
+            errorDiv.classList.add('show');
+            setTimeout(() => errorDiv.classList.remove('show'), 5000);
         }
 
-        function populateFilterOptions() {
-            if (rawData.length === 0) return;
-
-            const years = [...new Set(rawData.map(d => d.Ano))].sort((a, b) => a - b);
-            const months = [...new Set(rawData.map(d => d.Mês))].sort((a, b) => a - b);
-            const daysOfWeek = [...new Set(rawData.map(d => d['Dia da Semana']))].sort((a, b) => a - b);
-            const serviceTypes = [...new Set(rawData.map(d => d['Tipo de Serviço']))].sort();
-            const paymentMethods = [...new Set(rawData.map(d => d['Forma de Pagamento']))].sort();
-
-            const createCheckboxes = (containerId, options, valueMapper, labelMapper) => {
-                const container = document.getElementById(containerId);
-                container.innerHTML = '';
-                options.forEach(option => {
-                    const id = `filter-${containerId}-${valueMapper(option)}`;
-                    container.innerHTML += `
-                        <label for="${id}">
-                            <input type="checkbox" id="${id}" value="${valueMapper(option)}" checked>
-                            ${labelMapper(option)}
-                        </label>
-                    `;
-                });
-            };
-
-            createCheckboxes('yearFilterOptions', years, y => y, y => y);
-            createCheckboxes('monthFilterOptions', months, m => m, m => getFullMonthName(m));
-            createCheckboxes('dayOfWeekFilterOptions', daysOfWeek, d => d, d => getFullWeekDayName(d));
-            createCheckboxes('serviceTypeFilterOptions', serviceTypes, s => s, s => s);
-            createCheckboxes('paymentMethodFilterOptions', paymentMethods, p => p, p => p);
-
-            // Set default date range to cover all data
-            const minDate = new Date(Math.min(...rawData.map(d => d.FullDate.getTime())));
-            const maxDate = new Date(Math.max(...rawData.map(d => d.FullDate.getTime())));
-            document.getElementById('startDateFilter').value = minDate.toISOString().split('T')[0];
-            document.getElementById('endDateFilter').value = maxDate.toISOString().split('T')[0];
+        // Populate Filters
+        function populateFilters() {
+            const anos = [...new Set(rawData.map(d => d.ano))].sort();
+            const meses = [...new Set(rawData.map(d => d.mes))].sort((a, b) => a - b);
+            const quinzenas = [...new Set(rawData.map(d => d.quinzenas))].sort();
+            const diasSemana = [...new Set(rawData.map(d => d.dia_semana))];
+            const servicos = [...new Set(rawData.map(d => d.servico))];
+            const pagtos = [...new Set(rawData.map(d => d.pagto))];
+            
+            populateSelect('filter-ano', anos);
+            populateSelect('filter-mes', meses.map(m => ({value: m, label: getMonthName(m)})));
+            populateSelect('filter-quinzena', quinzenas);
+            populateSelect('filter-dia-semana', diasSemana);
+            populateSelect('filter-servico', servicos);
+            populateSelect('filter-pagto', pagtos);
         }
 
-        function getSelectedFilters() {
-            const getCheckedValues = (containerId) => {
-                return Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`)).map(cb => cb.value);
-            };
-
-            const selectedYears = getCheckedValues('yearFilterOptions').map(Number);
-            const selectedMonths = getCheckedValues('monthFilterOptions').map(Number);
-            const selectedDaysOfWeek = getCheckedValues('dayOfWeekFilterOptions').map(Number);
-            const selectedServiceTypes = getCheckedValues('serviceTypeFilterOptions');
-            const selectedPaymentMethods = getCheckedValues('paymentMethodFilterOptions');
-            const selectedQuinzena = document.getElementById('quinzenaFilter').value;
-            const startDate = document.getElementById('startDateFilter').value ? new Date(document.getElementById('startDateFilter').value + 'T00:00:00') : null;
-            const endDate = document.getElementById('endDateFilter').value ? new Date(document.getElementById('endDateFilter'].value + 'T23:59:59') : null;
-
-            let activeFiltersCount = 0;
-            if (selectedYears.length > 0 && selectedYears.length < document.querySelectorAll('#yearFilterOptions input').length) activeFiltersCount++;
-            if (selectedMonths.length > 0 && selectedMonths.length < document.querySelectorAll('#monthFilterOptions input').length) activeFiltersCount++;
-            if (selectedDaysOfWeek.length > 0 && selectedDaysOfWeek.length < document.querySelectorAll('#dayOfWeekFilterOptions input').length) activeFiltersCount++;
-            if (selectedServiceTypes.length > 0 && selectedServiceTypes.length < document.querySelectorAll('#serviceTypeFilterOptions input').length) activeFiltersCount++;
-            if (selectedPaymentMethods.length > 0 && selectedPaymentMethods.length < document.querySelectorAll('#paymentMethodFilterOptions input').length) activeFiltersCount++;
-            if (selectedQuinzena !== 'Todas') activeFiltersCount++;
-            if (startDate || endDate) activeFiltersCount++;
-
-            document.getElementById('activeFiltersCount').textContent = `${activeFiltersCount} filtro(s) ativo(s)`;
-
-            return {
-                selectedYears,
-                selectedMonths,
-                selectedDaysOfWeek,
-                selectedServiceTypes,
-                selectedPaymentMethods,
-                selectedQuinzena,
-                startDate,
-                endDate
-            };
-        }
-
-        function applyFilters() {
-            if (rawData.length === 0) {
-                filteredData = [];
-                renderDashboard();
-                return;
-            }
-
-            showLoadingSpinner();
-            const filters = getSelectedFilters();
-
-            filteredData = rawData.filter(row => {
-                const rowDate = row.FullDate;
-                const rowQuinzena = row.Dia <= 15 ? '1ª' : '2ª';
-
-                return (filters.selectedYears.includes(row.Ano)) &&
-                       (filters.selectedMonths.includes(row.Mês)) &&
-                       (filters.selectedDaysOfWeek.includes(row['Dia da Semana'])) &&
-                       (filters.selectedServiceTypes.includes(row['Tipo de Serviço'])) &&
-                       (filters.selectedPaymentMethods.includes(row['Forma de Pagamento'])) &&
-                       (filters.selectedQuinzena === 'Todas' || rowQuinzena === filters.selectedQuinzena) &&
-                       (!filters.startDate || rowDate >= filters.startDate) &&
-                       (!filters.endDate || rowDate <= filters.endDate);
+        function populateSelect(id, options) {
+            const select = document.getElementById(id);
+            select.innerHTML = '';
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                if (typeof opt === 'object') {
+                    option.value = opt.value;
+                    option.textContent = opt.label;
+                } else {
+                    option.value = opt;
+                    option.textContent = opt;
+                }
+                select.appendChild(option);
             });
+        }
 
-            renderDashboard();
-            hideLoadingSpinner();
+        function getMonthName(month) {
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return months[month - 1] || month;
+        }
+
+        // Apply Filters
+        function applyFilters() {
+            filteredData = rawData.filter(row => {
+                const anos = Array.from(document.getElementById('filter-ano').selectedOptions).map(o => Number(o.value));
+                const meses = Array.from(document.getElementById('filter-mes').selectedOptions).map(o => Number(o.value));
+                const quinzenas = Array.from(document.getElementById('filter-quinzena').selectedOptions).map(o => o.value);
+                const diasSemana = Array.from(document.getElementById('filter-dia-semana').selectedOptions).map(o => o.value);
+                const servicos = Array.from(document.getElementById('filter-servico').selectedOptions).map(o => o.value);
+                const pagtos = Array.from(document.getElementById('filter-pagto').selectedOptions).map(o => o.value);
+                const dataInicio = document.getElementById('filter-data-inicio').value;
+                const dataFim = document.getElementById('filter-data-fim').value;
+                
+                if (anos.length && !anos.includes(row.ano)) return false;
+                if (meses.length && !meses.includes(row.mes)) return false;
+                if (quinzenas.length && !quinzenas.includes(row.quinzenas)) return false;
+                if (diasSemana.length && !diasSemana.includes(row.dia_semana)) return false;
+                if (servicos.length && !servicos.includes(row.servico)) return false;
+                if (pagtos.length && !pagtos.includes(row.pagto)) return false;
+                
+                if (dataInicio || dataFim) {
+                    const rowDate = new Date(row.ano, row.mes - 1, row.dia);
+                    if (dataInicio && rowDate < new Date(dataInicio)) return false;
+                    if (dataFim && rowDate > new Date(dataFim)) return false;
+                }
+                
+                return true;
+            });
+            
+            updateDashboard();
         }
 
         function clearFilters() {
-            // Uncheck all checkboxes
-            document.querySelectorAll('.filter-options input[type="checkbox"]').forEach(cb => cb.checked = true);
-            // Reset dropdowns
-            document.getElementById('quinzenaFilter').value = 'Todas';
-            // Reset date pickers to cover all data
-            if (rawData.length > 0) {
-                const minDate = new Date(Math.min(...rawData.map(d => d.FullDate.getTime())));
-                const maxDate = new Date(Math.max(...rawData.map(d => d.FullDate.getTime())));
-                document.getElementById('startDateFilter').value = minDate.toISOString().split('T')[0];
-                document.getElementById('endDateFilter').value = maxDate.toISOString().split('T')[0];
-            } else {
-                document.getElementById('startDateFilter').value = '';
-                document.getElementById('endDateFilter').value = '';
-            }
-            applyFilters();
+            document.querySelectorAll('select').forEach(s => s.selectedIndex = -1);
+            document.getElementById('filter-data-inicio').value = '';
+            document.getElementById('filter-data-fim').value = '';
+            filteredData = [...rawData];
+            updateDashboard();
         }
 
-        // --- Dashboard Rendering ---
-        function renderDashboard() {
-            destroyCharts();
+        // Update Dashboard
+        function updateDashboard() {
             updateKPIs();
-
-            const activeTab = document.querySelector('.tab-button.active').dataset.tab;
-            switch (activeTab) {
-                case 'executiva':
-                    renderMonthlyRevenueChart();
-                    renderGoalAchievementChart();
-                    renderServiceMixChart();
-                    renderTop5ClientsChart();
-                    break;
-                case 'operacional':
-                    renderRevenueByDayOfWeekChart();
-                    renderDailyProductivityChart();
-                    renderServicesHeatmapChart();
-                    renderPaymentMethodsChart();
-                    renderAvgTicketByServiceChart();
-                    renderRevenueByFortnightChart();
-                    break;
-                case 'clientes':
-                    renderTop10ClientsChart();
-                    renderClientFrequencyChart();
-                    renderNewRecurringClientsChart();
-                    renderParetoChart();
-                    break;
-                case 'financeira':
-                    renderPaymentMethodsEvolutionChart();
-                    renderCommissionDistributionChart();
-                    renderGoalGapWaterfallChart();
-                    renderSeasonalityChart();
-                    renderYoYComparisonChart();
-                    break;
-            }
+            createAllCharts();
         }
 
+        // Update KPIs
         function updateKPIs() {
-            const totalRevenue = filteredData.reduce((sum, row) => sum + row.Valor, 0);
-            const totalServices = filteredData.length;
-            const uniqueClients = new Set(filteredData.map(row => row.Nome)).size;
-            const jeanCommission = filteredData.reduce((sum, row) => sum + row['Comissão Jean'], 0);
-            const reinoCommission = filteredData.reduce((sum, row) => sum + row['Comissão Reino da Barba'], 0);
-
-            const averageTicket = totalServices > 0 ? totalRevenue / totalServices : 0;
-
-            // For MoM and Goal Achievement, we need to determine the "current month" from the filtered data
-            // This is tricky if filters span multiple months. Let's take the latest month in filtered data.
-            let currentMonthRevenue = 0;
-            let previousMonthRevenue = 0;
-            let currentMonthGoal = 0;
-            let currentMonthClientsGoal = 0;
-            let momGrowth = 0;
-
-            if (filteredData.length > 0) {
-                const sortedDates = filteredData.map(d => d.FullDate).sort((a, b) => a - b);
-                const latestDate = sortedDates[sortedDates.length - 1];
-                const latestYear = latestDate.getFullYear();
-                const latestMonth = latestDate.getMonth() + 1; // 1-indexed
-
-                const currentMonthData = filteredData.filter(d => d.Ano === latestYear && d.Mês === latestMonth);
-                currentMonthRevenue = currentMonthData.reduce((sum, row) => sum + row.Valor, 0);
-
-                const prevMonthDate = new Date(latestYear, latestMonth - 2, 1); // Month - 2 because Date constructor is 0-indexed
-                const prevMonthYear = prevMonthDate.getFullYear();
-                const prevMonth = prevMonthDate.getMonth() + 1;
-
-                const previousMonthData = rawData.filter(d => d.Ano === prevMonthYear && d.Mês === prevMonth);
-                previousMonthRevenue = previousMonthData.reduce((sum, row) => sum + row.Valor, 0);
-
-                momGrowth = calculateMoMChange(currentMonthRevenue, previousMonthRevenue);
-
-                const goalKey = `${latestYear}-${latestMonth}`;
-                if (goalsData[goalKey]) {
-                    currentMonthGoal = goalsData[goalKey].metaMensal;
-                    currentMonthClientsGoal = goalsData[goalKey].metaClientes;
-                }
-            }
-
-            const goalAchievement = currentMonthGoal > 0 ? (currentMonthRevenue / currentMonthGoal) * 100 : 0;
-
-            const uniqueDates = new Set(filteredData.map(d => d.FullDate.toISOString().split('T')[0])).size;
-            const avgServicesPerDay = uniqueDates > 0 ? totalServices / uniqueDates : 0;
-
-            // Retention Rate (simplified for dashboard)
-            // Count clients who visited in the current filtered period AND visited in the previous period (relative to filtered period)
-            let retentionRate = 0;
-            if (filteredData.length > 0) {
-                const minDate = new Date(Math.min(...filteredData.map(d => d.FullDate.getTime())));
-                const maxDate = new Date(Math.max(...filteredData.map(d => d.FullDate.getTime())));
-
-                // Define "current period" as the filtered data's date range
-                // Define "previous period" as the same duration immediately preceding the filtered period
-                const durationMs = maxDate.getTime() - minDate.getTime();
-                const prevPeriodMaxDate = new Date(minDate.getTime() - 1);
-                const prevPeriodMinDate = new Date(prevPeriodMaxDate.getTime() - durationMs);
-
-                const clientsInCurrentPeriod = new Set(filteredData.map(d => d.Nome));
-                const clientsInPrevPeriod = new Set(rawData.filter(d => d.FullDate >= prevPeriodMinDate && d.FullDate <= prevPeriodMaxDate).map(d => d.Nome));
-
-                let retainedClients = 0;
-                clientsInCurrentPeriod.forEach(client => {
-                    if (clientsInPrevPeriod.has(client)) {
-                        retainedClients++;
-                    }
-                });
-                retentionRate = clientsInPrevPeriod.size > 0 ? (retainedClients / clientsInPrevPeriod.size) * 100 : 0;
-            }
-
-
-            document.getElementById('kpiTotalRevenue').textContent = formatCurrency(totalRevenue);
-            document.getElementById('kpiAverageTicket').textContent = formatCurrency(averageTicket);
-            document.getElementById('kpiTotalClients').textContent = uniqueClients.toLocaleString('pt-BR');
-            document.getElementById('kpiGoalAchievement').textContent = formatPercentage(goalAchievement);
-            document.getElementById('kpiJeanCommission').textContent = formatCurrency(jeanCommission);
-            document.getElementById('kpiReinoCommission').textContent = formatCurrency(reinoCommission);
-
-            const kpiMoMGrowth = document.getElementById('kpiMoMGrowth');
-            kpiMoMGrowth.textContent = formatPercentage(momGrowth);
-            kpiMoMGrowth.className = `value ${momGrowth >= 0 ? 'positive' : 'negative'}`;
-
-            document.getElementById('kpiAvgServicesPerDay').textContent = avgServicesPerDay.toFixed(1);
-            document.getElementById('kpiRetentionRate').textContent = formatPercentage(retentionRate);
-
-            // Update gauge chart if it exists
-            if (charts.goalAchievementChart) {
-                charts.goalAchievementChart.data.datasets[0].data = [goalAchievement, 100 - goalAchievement];
-                charts.goalAchievementChart.update();
-            }
+            const data = filteredData;
+            const totalReceita = data.reduce((sum, d) => sum + (d.valor || 0), 0);
+            const totalClientes = new Set(data.map(d => d.cliente)).size;
+            const ticketMedio = totalReceita / data.length;
+            const comissaoJean = data.reduce((sum, d) => sum + (d.comissao_jean || 0), 0);
+            const comissaoReino = data.reduce((sum, d) => sum + (d.comissao_reino_da_barba || 0), 0);
+            const metaMensal = data[0]?.meta_mensal || 0;
+            const atingimentoMeta = (totalReceita / metaMensal * 100).toFixed(1);
+            
+            const kpisHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-title">Total Receita</div>
+                    <div class="kpi-value">${formatCurrency(totalReceita)}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Ticket Médio</div>
+                    <div class="kpi-value">${formatCurrency(ticketMedio)}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Total Clientes</div>
+                    <div class="kpi-value">${totalClientes}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Atingimento Meta</div>
+                    <div class="kpi-value">${atingimentoMeta}%</div>
+                    <div class="kpi-change ${atingimentoMeta >= 100 ? 'positive' : 'negative'}">
+                        ${atingimentoMeta >= 100 ? '✓ Meta atingida' : '⚠ Abaixo da meta'}
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Comissão Jean</div>
+                    <div class="kpi-value">${formatCurrency(comissaoJean)}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Comissão Reino</div>
+                    <div class="kpi-value">${formatCurrency(comissaoReino)}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Atendimentos</div>
+                    <div class="kpi-value">${data.length}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Meta Mensal</div>
+                    <div class="kpi-value">${formatCurrency(metaMensal)}</div>
+                </div>
+            `;
+            
+            document.getElementById('kpis-container').innerHTML = kpisHTML;
         }
 
-        // --- Chart Rendering Functions ---
-        function renderMonthlyRevenueChart() {
-            const ctx = document.getElementById('monthlyRevenueChart').getContext('2d');
-            const monthlyData = {};
-
-            filteredData.forEach(row => {
-                const monthKey = `${row.Ano}-${row.Mês.toString().padStart(2, '0')}`;
-                if (!monthlyData[monthKey]) {
-                    monthlyData[monthKey] = { revenue: 0, goal: 0 };
-                }
-                monthlyData[monthKey].revenue += row.Valor;
-                // Get goal from goalsData, not filteredData, to ensure consistent goal
-                const goalKey = `${row.Ano}-${row.Mês}`;
-                if (goalsData[goalKey]) {
-                    monthlyData[monthKey].goal = goalsData[goalKey].metaMensal;
+        // Create All Charts
+        function createAllCharts() {
+            // Destroy old charts
+            Object.values(charts).forEach(chart => {
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
                 }
             });
+            charts = {};
+            
+            createRevenueGoalChart();
+            createGoalGaugeChart();
+            createServicesMixChart();
+            createTopClientsChart();
+            createRevenueDayWeekChart();
+            createDailyProductivityChart();
+            createServicesHeatmap();
+            createPaymentMethodsChart();
+            createAvgTicketChart();
+            createRevenueFortnightChart();
+            createClientFrequencyChart();
+            createNewRecurringChart();
+            createParetoChart();
+            createPaymentEvolutionChart();
+            createCommissionsChart();
+            createGoalGapChart();
+            createSeasonalityChart();
+            createYoYChart();
+        }
 
-            const sortedMonths = Object.keys(monthlyData).sort();
-            const labels = sortedMonths.map(key => {
-                const [year, month] = key.split('-');
-                return `${getMonthName(parseInt(month))}/${year.slice(2)}`;
+        // Chart 1: Revenue vs Goal
+        function createRevenueGoalChart() {
+            const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const labels = Object.keys(monthlyData).sort();
+            const revenues = labels.map(key => {
+                return monthlyData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
             });
-            const revenues = sortedMonths.map(key => monthlyData[key].revenue);
-            const goals = sortedMonths.map(key => monthlyData[key].goal);
-
-            charts.monthlyRevenueChart = new Chart(ctx, {
+            const goals = labels.map(key => monthlyData[key][0]?.meta_mensal || 0);
+            
+            const ctx = document.getElementById('chart-revenue-goal').getContext('2d');
+            charts.revenueGoal = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels.map(l => l.substring(5) + '/' + l.substring(0, 4)),
                     datasets: [
                         {
-                            label: 'Faturamento Real',
+                            label: 'Faturamento',
                             data: revenues,
-                            borderColor: varColor('--primary-color'),
-                            backgroundColor: varColor('--primary-color', 0.2),
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
                             fill: true,
-                            tension: 0.3
+                            tension: 0.4
                         },
                         {
-                            label: 'Meta Mensal',
+                            label: 'Meta',
                             data: goals,
-                            borderColor: varColor('--secondary-color'),
-                            backgroundColor: 'transparent',
+                            borderColor: '#10b981',
                             borderDash: [5, 5],
-                            tension: 0.3
+                            fill: false
                         }
                     ]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Faturamento Mensal vs. Meta',
-                            color: varColor('--text-color')
-                        },
+                        legend: { display: true },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
+                                label: context => context.dataset.label + ': ' + formatCurrency(context.parsed.y)
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Mês', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
+                            beginAtZero: true,
                             ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') }
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderGoalAchievementChart() {
-            const ctx = document.getElementById('goalAchievementChart').getContext('2d');
-            let currentMonthRevenue = 0;
-            let currentMonthGoal = 0;
-
-            if (filteredData.length > 0) {
-                const sortedDates = filteredData.map(d => d.FullDate).sort((a, b) => a - b);
-                const latestDate = sortedDates[sortedDates.length - 1];
-                const latestYear = latestDate.getFullYear();
-                const latestMonth = latestDate.getMonth() + 1;
-
-                const currentMonthData = filteredData.filter(d => d.Ano === latestYear && d.Mês === latestMonth);
-                currentMonthRevenue = currentMonthData.reduce((sum, row) => sum + row.Valor, 0);
-
-                const goalKey = `${latestYear}-${latestMonth}`;
-                if (goalsData[goalKey]) {
-                    currentMonthGoal = goalsData[goalKey].metaMensal;
-                }
-            }
-
-            const achievement = currentMonthGoal > 0 ? (currentMonthRevenue / currentMonthGoal) * 100 : 0;
-            const data = [Math.min(achievement, 100), Math.max(0, 100 - achievement)]; // Cap at 100% for visual
-
-            charts.goalAchievementChart = new Chart(ctx, {
+        // Chart 2: Goal Gauge
+        function createGoalGaugeChart() {
+            const totalReceita = filteredData.reduce((sum, d) => sum + (d.valor || 0), 0);
+            const metaMensal = filteredData[0]?.meta_mensal || 1;
+            const percentage = Math.min((totalReceita / metaMensal * 100), 100);
+            
+            const ctx = document.getElementById('chart-goal-gauge').getContext('2d');
+            charts.goalGauge = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Atingido', 'Restante'],
+                    labels: ['Atingido', 'Faltante'],
                     datasets: [{
-                        data: data,
-                        backgroundColor: [varColor('--secondary-color'), varColor('--border-color')],
-                        borderColor: varColor('--card-bg'),
-                        borderWidth: 2
+                        data: [percentage, 100 - percentage],
+                        backgroundColor: ['#10b981', '#e5e7eb'],
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    circumference: 180, // Half circle
-                    rotation: -90, // Start from top
-                    cutout: '70%',
+                    circumference: 180,
+                    rotation: 270,
+                    cutout: '75%',
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Atingimento da Meta Mensal',
-                            color: varColor('--text-color')
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed !== null) label += formatPercentage(context.parsed);
-                                    return label;
-                                }
+                                label: context => context.label + ': ' + context.parsed.toFixed(1) + '%'
                             }
-                        },
-                        datalabels: {
-                            formatter: (value, ctx) => {
-                                if (ctx.dataIndex === 0) return formatPercentage(value);
-                                return ''; // Only show for the 'achieved' part
-                            },
-                            color: varColor('--text-color'),
-                            font: { size: 16, weight: 'bold' }
-                        }
-                    },
-                    elements: {
-                        arc: {
-                            borderWidth: 0
                         }
                     }
-                },
-                plugins: [ChartDataLabels]
+                }
             });
         }
 
-        function renderServiceMixChart() {
-            const ctx = document.getElementById('serviceMixChart').getContext('2d');
-            const serviceMix = {};
-            filteredData.forEach(row => {
-                serviceMix[row['Tipo de Serviço']] = (serviceMix[row['Tipo de Serviço']] || 0) + row.Valor;
+        // Chart 3: Services Mix
+        function createServicesMixChart() {
+            const servicesData = groupBy(filteredData, d => d.servico);
+            const labels = Object.keys(servicesData);
+            const values = labels.map(key => {
+                return servicesData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
             });
-
-            const labels = Object.keys(serviceMix);
-            const data = Object.values(serviceMix);
-            const backgroundColors = labels.map((_, i) => getChartColors(i));
-            const borderColors = labels.map((_, i) => getChartBorderColors(i));
-
-            charts.serviceMixChart = new Chart(ctx, {
+            
+            const ctx = document.getElementById('chart-services-mix').getContext('2d');
+            charts.servicesMix = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
                     datasets: [{
-                        data: data,
-                        backgroundColor: backgroundColors,
-                        borderColor: borderColors,
-                        borderWidth: 1
+                        data: values,
+                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Mix de Serviços (Faturamento %)',
-                            color: varColor('--text-color')
-                        },
+                        legend: { position: 'bottom' },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed !== null) label += formatCurrency(context.parsed);
-                                    return label;
-                                },
-                                afterLabel: function(context) {
-                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                                    const percentage = (context.parsed / total) * 100;
-                                    return `(${percentage.toFixed(1)}%)`;
-                                }
+                                label: context => context.label + ': ' + formatCurrency(context.parsed)
                             }
-                        },
-                        datalabels: {
-                            formatter: (value, ctx) => {
-                                const total = ctx.dataset.data.reduce((sum, val) => sum + val, 0);
-                                const percentage = (value / total) * 100;
-                                return percentage > 5 ? `${percentage.toFixed(1)}%` : ''; // Only show if > 5%
-                            },
-                            color: '#fff',
-                            font: { weight: 'bold' }
-                        }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
-        }
-
-        function renderTop5ClientsChart() {
-            const ctx = document.getElementById('top5ClientsChart').getContext('2d');
-            const clientRevenue = {};
-            filteredData.forEach(row => {
-                clientRevenue[row.Nome] = (clientRevenue[row.Nome] || 0) + row.Valor;
-            });
-
-            const sortedClients = Object.entries(clientRevenue)
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 5);
-
-            const labels = sortedClients.map(([name]) => name);
-            const data = sortedClients.map(([, revenue]) => revenue);
-
-            charts.top5ClientsChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Faturamento',
-                        data: data,
-                        backgroundColor: labels.map((_, i) => getChartColors(i)),
-                        borderColor: labels.map((_, i) => getChartBorderColors(i)),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y', // Horizontal bar chart
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Top 5 Clientes por Faturamento',
-                            color: varColor('--text-color')
-                        },
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.x !== null) label += formatCurrency(context.parsed.x);
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
-                            ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
-                        y: {
-                            title: { display: true, text: 'Cliente', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
                         }
                     }
                 }
             });
         }
 
-        function renderRevenueByDayOfWeekChart() {
-            const ctx = document.getElementById('revenueByDayOfWeekChart').getContext('2d');
-            const revenueByDay = Array(7).fill(0); // 0: Dom, 1: Seg, ..., 6: Sáb
-
-            filteredData.forEach(row => {
-                revenueByDay[row['Dia da Semana']] += row.Valor;
-            });
-
-            const labels = dayOfWeekNames.map(name => name);
-            const data = revenueByDay;
-
-            charts.revenueByDayOfWeekChart = new Chart(ctx, {
+        // Chart 4: Top Clients
+        function createTopClientsChart() {
+            const clientsData = groupBy(filteredData, d => d.cliente);
+            const sorted = Object.entries(clientsData)
+                .map(([cliente, records]) => ({
+                    cliente,
+                    valor: records.reduce((sum, d) => sum + (d.valor || 0), 0)
+                }))
+                .sort((a, b) => b.valor - a.valor)
+                .slice(0, 10);
+            
+            const ctx = document.getElementById('chart-top-clients').getContext('2d');
+            charts.topClients = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: sorted.map(d => d.cliente),
                     datasets: [{
-                        label: 'Faturamento',
-                        data: data,
-                        backgroundColor: labels.map((_, i) => getChartColors(i)),
-                        borderColor: labels.map((_, i) => getChartBorderColors(i)),
-                        borderWidth: 1
+                        label: 'Receita',
+                        data: sorted.map(d => d.valor),
+                        backgroundColor: '#2563eb'
                     }]
                 },
                 options: {
+                    indexAxis: 'y',
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Faturamento por Dia da Semana',
-                            color: varColor('--text-color')
-                        },
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
+                                label: context => formatCurrency(context.parsed.x)
                             }
                         }
                     },
                     scales: {
                         x: {
-                            title: { display: true, text: 'Dia da Semana', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
-                        y: {
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
+                            beginAtZero: true,
                             ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') }
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderDailyProductivityChart() {
-            const ctx = document.getElementById('dailyProductivityChart').getContext('2d');
-            const dailyServices = {};
-
-            filteredData.forEach(row => {
-                const dateKey = row.FullDate.toISOString().split('T')[0];
-                dailyServices[dateKey] = (dailyServices[dateKey] || 0) + 1;
+        // Chart 5: Revenue by Day of Week
+        function createRevenueDayWeekChart() {
+            const daysOrder = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
+            const daysData = groupBy(filteredData, d => d.dia_semana.toLowerCase());
+            const data = daysOrder.map(day => {
+                const dayRecords = daysData[day] || [];
+                return dayRecords.reduce((sum, d) => sum + (d.valor || 0), 0);
             });
+            
+            const ctx = document.getElementById('chart-revenue-day-week').getContext('2d');
+            charts.revenueDayWeek = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: daysOrder.map(d => d.charAt(0).toUpperCase() + d.slice(1)),
+                    datasets: [{
+                        label: 'Receita',
+                        data: data,
+                        backgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: context => formatCurrency(context.parsed.y)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => formatCurrency(value)
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
-            const sortedDates = Object.keys(dailyServices).sort();
-            const labels = sortedDates.map(date => new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
-            const data = sortedDates.map(date => dailyServices[date]);
-
-            charts.dailyProductivityChart = new Chart(ctx, {
+        // Chart 6: Daily Productivity
+        function createDailyProductivityChart() {
+            const dailyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}-${String(d.dia).padStart(2, '0')}`);
+            const labels = Object.keys(dailyData).sort().slice(-30); // Last 30 days
+            const revenues = labels.map(key => {
+                return dailyData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
+            });
+            
+            const ctx = document.getElementById('chart-daily-productivity').getContext('2d');
+            charts.dailyProductivity = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels.map(l => l.substring(8) + '/' + l.substring(5, 7)),
                     datasets: [{
-                        label: 'Serviços por Dia',
-                        data: data,
-                        borderColor: varColor('--primary-color'),
-                        backgroundColor: varColor('--primary-color', 0.2),
+                        label: 'Receita Diária',
+                        data: revenues,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         fill: true,
-                        tension: 0.3
+                        tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Produtividade Diária (Serviços)',
-                            color: varColor('--text-color')
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += context.parsed.y.toLocaleString('pt-BR');
-                                    return label;
-                                }
+                                label: context => formatCurrency(context.parsed.y)
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Data', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
-                            title: { display: true, text: 'Nº de Serviços', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') },
-                            beginAtZero: true
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderServicesHeatmapChart() {
-            const ctx = document.getElementById('servicesHeatmapChart').getContext('2d');
-            const serviceTypes = [...new Set(rawData.map(d => d['Tipo de Serviço']))].sort(); // Use rawData for consistent labels
-            const daysOfWeek = Array.from({ length: 7 }, (_, i) => i); // 0-6
-
+        // Chart 7: Services Heatmap
+        function createServicesHeatmap() {
+            const daysOrder = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
+            const servicos = [...new Set(filteredData.map(d => d.servico))];
+            
             const heatmapData = {};
-            serviceTypes.forEach(service => {
-                heatmapData[service] = Array(7).fill(0);
-            });
-
-            filteredData.forEach(row => {
-                const serviceIndex = serviceTypes.indexOf(row['Tipo de Serviço']);
-                if (serviceIndex !== -1) {
-                    heatmapData[row['Tipo de Serviço']][row['Dia da Semana']] += 1;
-                }
-            });
-
-            const datasets = [];
-            let maxCount = 0;
-            serviceTypes.forEach((service, serviceIdx) => {
-                daysOfWeek.forEach(dayIdx => {
-                    const count = heatmapData[service][dayIdx];
-                    if (count > maxCount) maxCount = count;
-                    datasets.push({
-                        x: getFullWeekDayName(dayIdx),
-                        y: service,
-                        v: count
-                    });
+            servicos.forEach(servico => {
+                heatmapData[servico] = {};
+                daysOrder.forEach(day => {
+                    heatmapData[servico][day] = 0;
                 });
             });
-
-            // Custom Chart.js type for heatmap (simplified for this context, using scatter with custom drawing)
-            // This is a complex chart type for Chart.js. A simpler approach is to use a library or custom draw.
-            // For a single HTML file, a custom drawing on canvas or a table-like representation might be easier.
-            // Let's simulate with a bar chart where each bar represents a cell, and color indicates value.
-            // This will be a grouped bar chart, but it won't look like a true heatmap matrix.
-            // A true heatmap requires a custom Chart.js plugin or a different library.
-            // Given the constraint, I'll use a stacked bar chart to represent this, which is a compromise.
-
-            // Alternative: Create a grid of divs and color them. This is not a Chart.js chart.
-            // For a Chart.js solution, a custom plugin would be needed, which is too complex for this context.
-            // I will implement a simplified version using a table-like structure with colored cells.
-            // This will be rendered outside of Chart.js canvas.
-
-            const chartContainer = document.getElementById('servicesHeatmapChart').parentNode;
-            chartContainer.innerHTML = `
-                <h3 style="color: ${varColor('--text-color')}; margin-bottom: 1rem;">Serviços por Dia da Semana (Heatmap)</h3>
-                <div id="heatmapTable" style="display: grid; grid-template-columns: auto repeat(7, 1fr); gap: 2px; width: 100%; text-align: center;">
-                    <div style="background-color: ${varColor('--bg-color')}; padding: 0.5rem; font-weight: bold; color: ${varColor('--text-color')}">Serviço \ Dia</div>
-                    ${daysOfWeek.map(d => `<div style="background-color: ${varColor('--bg-color')}; padding: 0.5rem; font-weight: bold; color: ${varColor('--text-color')}">${getWeekDayName(d)}</div>`).join('')}
-                    ${serviceTypes.map(service => `
-                        <div style="background-color: ${varColor('--bg-color')}; padding: 0.5rem; font-weight: bold; color: ${varColor('--text-color')}">${service}</div>
-                        ${daysOfWeek.map(dayIdx => {
-                            const count = heatmapData[service][dayIdx];
-                            const intensity = maxCount > 0 ? count / maxCount : 0;
-                            const bgColor = `rgba(16, 185, 129, ${intensity * 0.8 + 0.2})`; // Greenish scale
-                            const textColor = intensity > 0.5 ? 'white' : varColor('--text-color');
-                            return `<div style="background-color: ${bgColor}; padding: 0.5rem; color: ${textColor};">${count}</div>`;
-                        }).join('')}
-                    `).join('')}
-                </div>
-            `;
-            // No Chart.js instance to store for this "chart"
+            
+            filteredData.forEach(d => {
+                const day = d.dia_semana.toLowerCase();
+                if (heatmapData[d.servico] && heatmapData[d.servico][day] !== undefined) {
+                    heatmapData[d.servico][day]++;
+                }
+            });
+            
+            const maxValue = Math.max(...Object.values(heatmapData).flatMap(obj => Object.values(obj)));
+            
+            let html = '<table class="heatmap-table"><thead><tr><th>Serviço</th>';
+            daysOrder.forEach(day => {
+                html += `<th>${day.charAt(0).toUpperCase() + day.slice(1)}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            servicos.forEach(servico => {
+                html += `<tr><td><strong>${servico}</strong></td>`;
+                daysOrder.forEach(day => {
+                    const value = heatmapData[servico][day];
+                    const intensity = maxValue > 0 ? (value / maxValue) : 0;
+                    const color = `rgba(37, 99, 235, ${intensity})`;
+                    html += `<td style="background: ${color}; color: ${intensity > 0.5 ? 'white' : 'black'}">${value}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('heatmap-services').innerHTML = html;
         }
 
-        function renderPaymentMethodsChart() {
-            const ctx = document.getElementById('paymentMethodsChart').getContext('2d');
-            const paymentMethodData = {};
-            filteredData.forEach(row => {
-                paymentMethodData[row['Forma de Pagamento']] = (paymentMethodData[row['Forma de Pagamento']] || 0) + row.Valor;
+        // Chart 8: Payment Methods
+        function createPaymentMethodsChart() {
+            const paymentData = groupBy(filteredData, d => d.pagto);
+            const labels = Object.keys(paymentData);
+            const values = labels.map(key => {
+                return paymentData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
             });
-
-            const labels = Object.keys(paymentMethodData);
-            const data = Object.values(paymentMethodData);
-            const backgroundColors = labels.map((_, i) => getChartColors(i));
-            const borderColors = labels.map((_, i) => getChartBorderColors(i));
-
-            charts.paymentMethodsChart = new Chart(ctx, {
+            
+            const ctx = document.getElementById('chart-payment-methods').getContext('2d');
+            charts.paymentMethods = new Chart(ctx, {
                 type: 'pie',
                 data: {
                     labels: labels,
                     datasets: [{
-                        data: data,
-                        backgroundColor: backgroundColors,
-                        borderColor: borderColors,
-                        borderWidth: 1
+                        data: values,
+                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Distribuição de Formas de Pagamento',
-                            color: varColor('--text-color')
-                        },
+                        legend: { position: 'bottom' },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed !== null) label += formatCurrency(context.parsed);
-                                    return label;
-                                },
-                                afterLabel: function(context) {
-                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                                    const percentage = (context.parsed / total) * 100;
-                                    return `(${percentage.toFixed(1)}%)`;
-                                }
+                                label: context => context.label + ': ' + formatCurrency(context.parsed)
                             }
-                        },
-                        datalabels: {
-                            formatter: (value, ctx) => {
-                                const total = ctx.dataset.data.reduce((sum, val) => sum + val, 0);
-                                const percentage = (value / total) * 100;
-                                return percentage > 5 ? `${percentage.toFixed(1)}%` : '';
-                            },
-                            color: '#fff',
-                            font: { weight: 'bold' }
                         }
                     }
-                },
-                plugins: [ChartDataLabels]
+                }
             });
         }
 
-        function renderAvgTicketByServiceChart() {
-            const ctx = document.getElementById('avgTicketByServiceChart').getContext('2d');
-            const serviceStats = {}; // { service: { totalRevenue: 0, count: 0 } }
-
-            filteredData.forEach(row => {
-                if (!serviceStats[row['Tipo de Serviço']]) {
-                    serviceStats[row['Tipo de Serviço']] = { totalRevenue: 0, count: 0 };
-                }
-                serviceStats[row['Tipo de Serviço']].totalRevenue += row.Valor;
-                serviceStats[row['Tipo de Serviço']].count += 1;
+        // Chart 9: Average Ticket by Service
+        function createAvgTicketChart() {
+            const servicesData = groupBy(filteredData, d => d.servico);
+            const labels = Object.keys(servicesData);
+            const avgTickets = labels.map(key => {
+                const records = servicesData[key];
+                const total = records.reduce((sum, d) => sum + (d.valor || 0), 0);
+                return total / records.length;
             });
-
-            const labels = Object.keys(serviceStats);
-            const data = labels.map(service => {
-                const stats = serviceStats[service];
-                return stats.count > 0 ? stats.totalRevenue / stats.count : 0;
-            });
-
-            charts.avgTicketByServiceChart = new Chart(ctx, {
+            
+            const ctx = document.getElementById('chart-avg-ticket').getContext('2d');
+            charts.avgTicket = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Ticket Médio',
-                        data: data,
-                        backgroundColor: labels.map((_, i) => getChartColors(i)),
-                        borderColor: labels.map((_, i) => getChartBorderColors(i)),
-                        borderWidth: 1
+                        data: avgTickets,
+                        backgroundColor: '#f59e0b'
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Ticket Médio por Tipo de Serviço',
-                            color: varColor('--text-color')
-                        },
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
+                                label: context => formatCurrency(context.parsed.y)
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Tipo de Serviço', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
+                            beginAtZero: true,
                             ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') },
-                            beginAtZero: true
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderRevenueByFortnightChart() {
-            const ctx = document.getElementById('revenueByFortnightChart').getContext('2d');
-            const monthlyFortnightData = {}; // { 'YYYY-MM': { '1ª': 0, '2ª': 0 } }
-
-            filteredData.forEach(row => {
-                const monthKey = `${row.Ano}-${row.Mês.toString().padStart(2, '0')}`;
-                if (!monthlyFortnightData[monthKey]) {
-                    monthlyFortnightData[monthKey] = { '1ª': 0, '2ª': 0 };
-                }
-                const quinzena = row.Dia <= 15 ? '1ª' : '2ª';
-                monthlyFortnightData[monthKey][quinzena] += row.Valor;
+        // Chart 10: Revenue by Fortnight
+        function createRevenueFortnightChart() {
+            const fortnightData = groupBy(filteredData, d => d.quinzenas);
+            const labels = Object.keys(fortnightData).sort();
+            const revenues = labels.map(key => {
+                return fortnightData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
             });
-
-            const sortedMonths = Object.keys(monthlyFortnightData).sort();
-            const labels = sortedMonths.map(key => {
-                const [year, month] = key.split('-');
-                return `${getMonthName(parseInt(month))}/${year.slice(2)}`;
-            });
-            const firstFortnightData = sortedMonths.map(key => monthlyFortnightData[key]['1ª']);
-            const secondFortnightData = sortedMonths.map(key => monthlyFortnightData[key]['2ª']);
-
-            charts.revenueByFortnightChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '1ª Quinzena',
-                            data: firstFortnightData,
-                            backgroundColor: varColor('--primary-color'),
-                            borderColor: varColor('--primary-color'),
-                            borderWidth: 1
-                        },
-                        {
-                            label: '2ª Quinzena',
-                            data: secondFortnightData,
-                            backgroundColor: varColor('--secondary-color'),
-                            borderColor: varColor('--secondary-color'),
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Faturamento por Quinzena',
-                            color: varColor('--text-color')
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            title: { display: true, text: 'Mês', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
-                        y: {
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
-                            ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') },
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderTop10ClientsChart() {
-            const ctx = document.getElementById('top10ClientsChart').getContext('2d');
-            const clientRevenue = {};
-            filteredData.forEach(row => {
-                clientRevenue[row.Nome] = (clientRevenue[row.Nome] || 0) + row.Valor;
-            });
-
-            const sortedClients = Object.entries(clientRevenue)
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 10);
-
-            const labels = sortedClients.map(([name]) => name);
-            const data = sortedClients.map(([, revenue]) => revenue);
-
-            charts.top10ClientsChart = new Chart(ctx, {
+            
+            const ctx = document.getElementById('chart-revenue-fortnight').getContext('2d');
+            charts.revenueFortnight = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Faturamento',
-                        data: data,
-                        backgroundColor: labels.map((_, i) => getChartColors(i)),
-                        borderColor: labels.map((_, i) => getChartBorderColors(i)),
-                        borderWidth: 1
+                        label: 'Receita por Quinzena',
+                        data: revenues,
+                        backgroundColor: '#10b981'
                     }]
                 },
                 options: {
-                    indexAxis: 'y', // Horizontal bar chart
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Top 10 Clientes por Faturamento',
-                            color: varColor('--text-color')
-                        },
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.x !== null) label += formatCurrency(context.parsed.x);
-                                    return label;
-                                }
+                                label: context => formatCurrency(context.parsed.y)
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
-                            ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
-                            title: { display: true, text: 'Cliente', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderClientFrequencyChart() {
-            const ctx = document.getElementById('clientFrequencyChart').getContext('2d');
-            const clientVisits = {};
-            filteredData.forEach(row => {
-                clientVisits[row.Nome] = (clientVisits[row.Nome] || 0) + 1;
+        // Chart 11: Client Frequency
+        function createClientFrequencyChart() {
+            const clientCounts = {};
+            filteredData.forEach(d => {
+                clientCounts[d.cliente] = (clientCounts[d.cliente] || 0) + 1;
             });
-
-            const frequencyBins = {
-                '1x': 0,
-                '2x': 0,
-                '3x': 0,
-                '4-5x': 0,
-                '6+x': 0
-            };
-
-            Object.values(clientVisits).forEach(visits => {
-                if (visits === 1) frequencyBins['1x']++;
-                else if (visits === 2) frequencyBins['2x']++;
-                else if (visits === 3) frequencyBins['3x']++;
-                else if (visits >= 4 && visits <= 5) frequencyBins['4-5x']++;
-                else if (visits >= 6) frequencyBins['6+x']++;
+            
+            const frequencies = Object.values(clientCounts);
+            const histogram = {};
+            frequencies.forEach(freq => {
+                const bucket = freq === 1 ? '1' : freq === 2 ? '2' : freq === 3 ? '3' : freq <= 5 ? '4-5' : '6+';
+                histogram[bucket] = (histogram[bucket] || 0) + 1;
             });
-
-            const labels = Object.keys(frequencyBins);
-            const data = Object.values(frequencyBins);
-
-            charts.clientFrequencyChart = new Chart(ctx, {
+            
+            const labels = ['1', '2', '3', '4-5', '6+'];
+            const data = labels.map(l => histogram[l] || 0);
+            
+            const ctx = document.getElementById('chart-client-frequency').getContext('2d');
+            charts.clientFrequency = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: labels.map(l => l + ' visitas'),
                     datasets: [{
                         label: 'Número de Clientes',
                         data: data,
-                        backgroundColor: labels.map((_, i) => getChartColors(i)),
-                        borderColor: labels.map((_, i) => getChartBorderColors(i)),
-                        borderWidth: 1
+                        backgroundColor: '#2563eb'
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Frequência de Visitas dos Clientes',
-                            color: varColor('--text-color')
-                        },
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += context.parsed.y.toLocaleString('pt-BR');
-                                    return label;
-                                }
-                            }
-                        }
+                        legend: { display: false }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Número de Visitas', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
-                            title: { display: true, text: 'Nº de Clientes', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') },
                             beginAtZero: true
                         }
                     }
@@ -1919,108 +1253,62 @@
             });
         }
 
-        function renderNewRecurringClientsChart() {
-            const ctx = document.getElementById('newRecurringClientsChart').getContext('2d');
-            const monthlyClientData = {}; // { 'YYYY-MM': { new: Set(), recurring: Set(), allClientsInMonth: Set() } }
-            const clientFirstVisit = {}; // { clientName: Date }
-
-            // First pass: determine first visit for each client from ALL rawData
-            rawData.forEach(row => {
-                if (!clientFirstVisit[row.Nome] || row.FullDate < clientFirstVisit[row.Nome]) {
-                    clientFirstVisit[row.Nome] = row.FullDate;
-                }
-            });
-
-            // Second pass: categorize clients in filteredData
-            filteredData.forEach(row => {
-                const monthKey = `${row.Ano}-${row.Mês.toString().padStart(2, '0')}`;
-                if (!monthlyClientData[monthKey]) {
-                    monthlyClientData[monthKey] = { new: new Set(), recurring: new Set(), allClientsInMonth: new Set() };
-                }
-                monthlyClientData[monthKey].allClientsInMonth.add(row.Nome);
-            });
-
-            const sortedMonths = Object.keys(monthlyClientData).sort();
-            const labels = sortedMonths.map(key => {
-                const [year, month] = key.split('-');
-                return `${getMonthName(parseInt(month))}/${year.slice(2)}`;
-            });
-
-            const newClientsCount = [];
-            const recurringClientsCount = [];
-
-            sortedMonths.forEach(monthKey => {
-                const [year, month] = monthKey.split('-');
-                const currentMonthStart = new Date(parseInt(year), parseInt(month) - 1, 1);
-
+        // Chart 12: New vs Recurring Clients
+        function createNewRecurringChart() {
+            const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const labels = Object.keys(monthlyData).sort();
+            
+            const seenClients = new Set();
+            const newClients = [];
+            const recurringClients = [];
+            
+            labels.forEach(month => {
+                const monthRecords = monthlyData[month];
                 let newCount = 0;
                 let recurringCount = 0;
-
-                monthlyClientData[monthKey].allClientsInMonth.forEach(clientName => {
-                    if (clientFirstVisit[clientName].getFullYear() === currentMonthStart.getFullYear() &&
-                        clientFirstVisit[clientName].getMonth() === currentMonthStart.getMonth()) {
-                        newCount++;
-                    } else {
+                
+                monthRecords.forEach(d => {
+                    if (seenClients.has(d.cliente)) {
                         recurringCount++;
+                    } else {
+                        newCount++;
+                        seenClients.add(d.cliente);
                     }
                 });
-                newClientsCount.push(newCount);
-                recurringClientsCount.push(recurringCount);
+                
+                newClients.push(newCount);
+                recurringClients.push(recurringCount);
             });
-
-            charts.newRecurringClientsChart = new Chart(ctx, {
+            
+            const ctx = document.getElementById('chart-new-recurring').getContext('2d');
+            charts.newRecurring = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels.map(l => l.substring(5) + '/' + l.substring(0, 4)),
                     datasets: [
                         {
-                            label: 'Novos Clientes',
-                            data: newClientsCount,
-                            borderColor: varColor('--primary-color'),
-                            backgroundColor: varColor('--primary-color', 0.2),
-                            fill: true,
-                            tension: 0.3
+                            label: 'Novos',
+                            data: newClients,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true
                         },
                         {
-                            label: 'Clientes Recorrentes',
-                            data: recurringClientsCount,
-                            borderColor: varColor('--secondary-color'),
-                            backgroundColor: varColor('--secondary-color', 0.2),
-                            fill: true,
-                            tension: 0.3
+                            label: 'Recorrentes',
+                            data: recurringClients,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true
                         }
                     ]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Novos vs. Clientes Recorrentes (Mensal)',
-                            color: varColor('--text-color')
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += context.parsed.y.toLocaleString('pt-BR');
-                                    return label;
-                                }
-                            }
-                        }
+                        legend: { display: true }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Mês', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
-                            title: { display: true, text: 'Nº de Clientes', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') },
                             beginAtZero: true
                         }
                     }
@@ -2028,557 +1316,345 @@
             });
         }
 
-        function renderParetoChart() {
-            const ctx = document.getElementById('paretoChart').getContext('2d');
-            const clientRevenue = {};
-            filteredData.forEach(row => {
-                clientRevenue[row.Nome] = (clientRevenue[row.Nome] || 0) + row.Valor;
+        // Chart 13: Pareto (ABC Curve)
+        function createParetoChart() {
+            const clientsData = groupBy(filteredData, d => d.cliente);
+            const sorted = Object.entries(clientsData)
+                .map(([cliente, records]) => ({
+                    cliente,
+                    valor: records.reduce((sum, d) => sum + (d.valor || 0), 0)
+                }))
+                .sort((a, b) => b.valor - a.valor);
+            
+            const totalRevenue = sorted.reduce((sum, d) => sum + d.valor, 0);
+            let cumulative = 0;
+            const cumulativePercentages = sorted.map(d => {
+                cumulative += d.valor;
+                return (cumulative / totalRevenue * 100).toFixed(1);
             });
-
-            const sortedClients = Object.entries(clientRevenue)
-                .sort(([, a], [, b]) => b - a);
-
-            const labels = sortedClients.map(([name]) => name);
-            const revenues = sortedClients.map(([, revenue]) => revenue);
-
-            let cumulativeRevenue = 0;
-            const totalRevenue = revenues.reduce((sum, val) => sum + val, 0);
-            const cumulativePercentages = revenues.map(rev => {
-                cumulativeRevenue += rev;
-                return (cumulativeRevenue / totalRevenue) * 100;
-            });
-
-            charts.paretoChart = new Chart(ctx, {
+            
+            const top20 = sorted.slice(0, Math.ceil(sorted.length * 0.2));
+            
+            const ctx = document.getElementById('chart-pareto').getContext('2d');
+            charts.pareto = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: top20.map((d, i) => `Cliente ${i + 1}`),
                     datasets: [
                         {
-                            label: 'Faturamento por Cliente',
-                            data: revenues,
-                            backgroundColor: varColor('--primary-color'),
-                            borderColor: varColor('--primary-color'),
-                            borderWidth: 1,
+                            type: 'bar',
+                            label: 'Receita',
+                            data: top20.map(d => d.valor),
+                            backgroundColor: '#2563eb',
                             yAxisID: 'y'
                         },
                         {
-                            label: 'Faturamento Acumulado (%)',
-                            data: cumulativePercentages,
                             type: 'line',
-                            borderColor: varColor('--accent-color'),
+                            label: '% Acumulado',
+                            data: cumulativePercentages.slice(0, top20.length),
+                            borderColor: '#ef4444',
                             backgroundColor: 'transparent',
-                            fill: false,
-                            yAxisID: 'y1',
-                            tension: 0.3,
-                            pointRadius: 3
+                            yAxisID: 'y1'
                         }
                     ]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Curva ABC de Clientes (Faturamento)',
-                            color: varColor('--text-color')
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.dataset.type === 'line') {
-                                        label += formatPercentage(context.parsed.y);
-                                    } else {
-                                        label += formatCurrency(context.parsed.y);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
+                        legend: { display: true }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Cliente', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
                             type: 'linear',
                             position: 'left',
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
+                            beginAtZero: true,
                             ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') },
-                            beginAtZero: true
+                                callback: value => formatCurrency(value)
+                            }
                         },
                         y1: {
                             type: 'linear',
                             position: 'right',
-                            title: { display: true, text: 'Acumulado (%)', color: varColor('--chart-text-color') },
+                            beginAtZero: true,
+                            max: 100,
                             ticks: {
-                                callback: function(value) { return formatPercentage(value); },
-                                color: varColor('--chart-text-color')
+                                callback: value => value + '%'
                             },
-                            grid: { drawOnChartArea: false, color: varColor('--chart-grid-color') },
-                            min: 0,
-                            max: 100
+                            grid: {
+                                drawOnChartArea: false
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderPaymentMethodsEvolutionChart() {
-            const ctx = document.getElementById('paymentMethodsEvolutionChart').getContext('2d');
-            const monthlyPaymentData = {}; // { 'YYYY-MM': { PIX: 0, CRÉDITO: 0, DÉBITO: 0 } }
-            const allPaymentMethods = [...new Set(rawData.map(d => d['Forma de Pagamento']))].sort();
-
-            filteredData.forEach(row => {
-                const monthKey = `${row.Ano}-${row.Mês.toString().padStart(2, '0')}`;
-                if (!monthlyPaymentData[monthKey]) {
-                    monthlyPaymentData[monthKey] = {};
-                    allPaymentMethods.forEach(method => monthlyPaymentData[monthKey][method] = 0);
-                }
-                monthlyPaymentData[monthKey][row['Forma de Pagamento']] += row.Valor;
+        // Chart 14: Payment Evolution
+        function createPaymentEvolutionChart() {
+            const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const labels = Object.keys(monthlyData).sort();
+            const paymentTypes = [...new Set(filteredData.map(d => d.pagto))];
+            
+            const datasets = paymentTypes.map((type, index) => {
+                const colors = ['#2563eb', '#10b981', '#f59e0b'];
+                return {
+                    label: type,
+                    data: labels.map(month => {
+                        const monthRecords = monthlyData[month].filter(d => d.pagto === type);
+                        return monthRecords.reduce((sum, d) => sum + (d.valor || 0), 0);
+                    }),
+                    borderColor: colors[index % colors.length],
+                    backgroundColor: colors[index % colors.length] + '33',
+                    fill: true
+                };
             });
-
-            const sortedMonths = Object.keys(monthlyPaymentData).sort();
-            const labels = sortedMonths.map(key => {
-                const [year, month] = key.split('-');
-                return `${getMonthName(parseInt(month))}/${year.slice(2)}`;
-            });
-
-            const datasets = allPaymentMethods.map((method, i) => ({
-                label: method,
-                data: sortedMonths.map(key => monthlyPaymentData[key][method] || 0),
-                backgroundColor: getChartColors(i),
-                borderColor: getChartBorderColors(i),
-                fill: true,
-                tension: 0.3
-            }));
-
-            charts.paymentMethodsEvolutionChart = new Chart(ctx, {
+            
+            const ctx = document.getElementById('chart-payment-evolution').getContext('2d');
+            charts.paymentEvolution = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels.map(l => l.substring(5) + '/' + l.substring(0, 4)),
                     datasets: datasets
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Evolução das Formas de Pagamento (Mensal)',
-                            color: varColor('--text-color')
-                        },
+                        legend: { display: true },
                         tooltip: {
-                            mode: 'index',
-                            intersect: false,
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
+                                label: context => context.dataset.label + ': ' + formatCurrency(context.parsed.y)
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Mês', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
+                            beginAtZero: true,
                             stacked: true,
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
                             ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') },
-                            beginAtZero: true
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderCommissionDistributionChart() {
-            const ctx = document.getElementById('commissionDistributionChart').getContext('2d');
-            const monthlyCommissionData = {}; // { 'YYYY-MM': { jean: 0, reino: 0 } }
-
-            filteredData.forEach(row => {
-                const monthKey = `${row.Ano}-${row.Mês.toString().padStart(2, '0')}`;
-                if (!monthlyCommissionData[monthKey]) {
-                    monthlyCommissionData[monthKey] = { jean: 0, reino: 0 };
-                }
-                monthlyCommissionData[monthKey].jean += row['Comissão Jean'];
-                monthlyCommissionData[monthKey].reino += row['Comissão Reino da Barba'];
+        // Chart 15: Commissions Distribution
+        function createCommissionsChart() {
+            const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const labels = Object.keys(monthlyData).sort();
+            
+            const jeanData = labels.map(month => {
+                return monthlyData[month].reduce((sum, d) => sum + (d.comissao_jean || 0), 0);
             });
-
-            const sortedMonths = Object.keys(monthlyCommissionData).sort();
-            const labels = sortedMonths.map(key => {
-                const [year, month] = key.split('-');
-                return `${getMonthName(parseInt(month))}/${year.slice(2)}`;
+            
+            const reinoData = labels.map(month => {
+                return monthlyData[month].reduce((sum, d) => sum + (d.comissao_reino_da_barba || 0), 0);
             });
-            const jeanCommissions = sortedMonths.map(key => monthlyCommissionData[key].jean);
-            const reinoCommissions = sortedMonths.map(key => monthlyCommissionData[key].reino);
-
-            charts.commissionDistributionChart = new Chart(ctx, {
+            
+            const ctx = document.getElementById('chart-commissions').getContext('2d');
+            charts.commissions = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: labels.map(l => l.substring(5) + '/' + l.substring(0, 4)),
                     datasets: [
                         {
-                            label: 'Comissão Jean',
-                            data: jeanCommissions,
-                            backgroundColor: varColor('--primary-color'),
-                            borderColor: varColor('--primary-color'),
-                            borderWidth: 1
+                            label: 'Jean',
+                            data: jeanData,
+                            backgroundColor: '#2563eb'
                         },
                         {
-                            label: 'Comissão Reino da Barba',
-                            data: reinoCommissions,
-                            backgroundColor: varColor('--secondary-color'),
-                            borderColor: varColor('--secondary-color'),
-                            borderWidth: 1
+                            label: 'Reino da Barba',
+                            data: reinoData,
+                            backgroundColor: '#10b981'
                         }
                     ]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Distribuição de Comissões (Mensal)',
-                            color: varColor('--text-color')
-                        },
+                        legend: { display: true },
                         tooltip: {
-                            mode: 'index',
-                            intersect: false,
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
+                                label: context => context.dataset.label + ': ' + formatCurrency(context.parsed.y)
                             }
                         }
                     },
                     scales: {
                         x: {
-                            title: { display: true, text: 'Mês', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
+                            stacked: true
                         },
                         y: {
                             stacked: true,
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
+                            beginAtZero: true,
                             ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') },
-                            beginAtZero: true
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderGoalGapWaterfallChart() {
-            const ctx = document.getElementById('goalGapWaterfallChart').getContext('2d');
-            // For simplicity, let's focus on the latest month in the filtered data
-            let latestMonthRevenue = 0;
-            let latestMonthGoal = 0;
-            let monthLabel = 'N/A';
-
-            if (filteredData.length > 0) {
-                const sortedDates = filteredData.map(d => d.FullDate).sort((a, b) => a - b);
-                const latestDate = sortedDates[sortedDates.length - 1];
-                const latestYear = latestDate.getFullYear();
-                const latestMonth = latestDate.getMonth() + 1;
-
-                const currentMonthData = filteredData.filter(d => d.Ano === latestYear && d.Mês === latestMonth);
-                latestMonthRevenue = currentMonthData.reduce((sum, row) => sum + row.Valor, 0);
-
-                const goalKey = `${latestYear}-${latestMonth}`;
-                if (goalsData[goalKey]) {
-                    latestMonthGoal = goalsData[goalKey].metaMensal;
-                }
-                monthLabel = `${getFullMonthName(latestMonth)}/${latestYear}`;
-            }
-
-            const gap = latestMonthGoal - latestMonthRevenue;
-
-            const data = {
-                labels: ['Meta', 'Realizado', 'Diferença'],
-                datasets: [{
-                    label: 'Faturamento',
-                    data: [latestMonthGoal, latestMonthRevenue, gap],
-                    backgroundColor: [
-                        varColor('--primary-color'), // Meta
-                        varColor('--secondary-color'), // Realizado
-                        gap >= 0 ? varColor('--accent-color') : '#ef4444' // Diferença (orange for positive gap, red for negative)
-                    ],
-                    borderColor: [
-                        varColor('--primary-color'),
-                        varColor('--secondary-color'),
-                        gap >= 0 ? varColor('--accent-color') : '#ef4444'
-                    ],
-                    borderWidth: 1
-                }]
-            };
-
-            charts.goalGapWaterfallChart = new Chart(ctx, {
+        // Chart 16: Goal Gap (Waterfall)
+        function createGoalGapChart() {
+            const totalReceita = filteredData.reduce((sum, d) => sum + (d.valor || 0), 0);
+            const metaMensal = filteredData[0]?.meta_mensal || 0;
+            const gap = totalReceita - metaMensal;
+            
+            const ctx = document.getElementById('chart-goal-gap').getContext('2d');
+            charts.goalGap = new Chart(ctx, {
                 type: 'bar',
-                data: data,
+                data: {
+                    labels: ['Meta', 'Realizado', 'Gap'],
+                    datasets: [{
+                        data: [metaMensal, totalReceita, gap],
+                        backgroundColor: ['#64748b', '#2563eb', gap >= 0 ? '#10b981' : '#ef4444']
+                    }]
+                },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: `Análise de Diferença da Meta (${monthLabel})`,
-                            color: varColor('--text-color')
-                        },
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
+                                label: context => formatCurrency(context.parsed.y)
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Item', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
+                            beginAtZero: true,
                             ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') }
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderSeasonalityChart() {
-            const ctx = document.getElementById('seasonalityChart').getContext('2d');
-            const monthlyRevenue = {}; // { 'YYYY-MM': revenue }
-
-            filteredData.forEach(row => {
-                const monthKey = `${row.Ano}-${row.Mês.toString().padStart(2, '0')}`;
-                monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + row.Valor;
+        // Chart 17: Seasonality with Moving Average
+        function createSeasonalityChart() {
+            const dailyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}-${String(d.dia).padStart(2, '0')}`);
+            const labels = Object.keys(dailyData).sort().slice(-60); // Last 60 days
+            const revenues = labels.map(key => {
+                return dailyData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
             });
-
-            const sortedMonths = Object.keys(monthlyRevenue).sort();
-            const labels = sortedMonths.map(key => {
-                const [year, month] = key.split('-');
-                return `${getMonthName(parseInt(month))}/${year.slice(2)}`;
+            
+            // Calculate 7-day moving average
+            const movingAvg = revenues.map((_, index, arr) => {
+                const start = Math.max(0, index - 6);
+                const window = arr.slice(start, index + 1);
+                return window.reduce((sum, val) => sum + val, 0) / window.length;
             });
-            const revenues = sortedMonths.map(key => monthlyRevenue[key]);
-
-            // Calculate 3-month moving average
-            const movingAverage = [];
-            for (let i = 0; i < revenues.length; i++) {
-                if (i < 2) { // Not enough data for 3-month average
-                    movingAverage.push(null);
-                } else {
-                    const sum = revenues[i] + revenues[i - 1] + revenues[i - 2];
-                    movingAverage.push(sum / 3);
-                }
-            }
-
-            charts.seasonalityChart = new Chart(ctx, {
+            
+            const ctx = document.getElementById('chart-seasonality').getContext('2d');
+            charts.seasonality = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels.map(l => l.substring(8) + '/' + l.substring(5, 7)),
                     datasets: [
                         {
-                            label: 'Faturamento Mensal',
+                            label: 'Receita Diária',
                             data: revenues,
-                            borderColor: varColor('--primary-color'),
-                            backgroundColor: varColor('--primary-color', 0.2),
-                            fill: false,
-                            tension: 0.3
+                            borderColor: '#cbd5e1',
+                            backgroundColor: 'transparent',
+                            borderWidth: 1
                         },
                         {
-                            label: 'Média Móvel (3 meses)',
-                            data: movingAverage,
-                            borderColor: varColor('--accent-color'),
+                            label: 'Média Móvel (7 dias)',
+                            data: movingAvg,
+                            borderColor: '#2563eb',
                             backgroundColor: 'transparent',
-                            borderDash: [5, 5],
-                            tension: 0.3,
-                            pointRadius: 0
+                            borderWidth: 2
                         }
                     ]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Análise de Sazonalidade (Faturamento Mensal)',
-                            color: varColor('--text-color')
-                        },
+                        legend: { display: true },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
+                                label: context => context.dataset.label + ': ' + formatCurrency(context.parsed.y)
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Mês', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
+                            beginAtZero: true,
                             ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') },
-                            beginAtZero: true
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        function renderYoYComparisonChart() {
-            const ctx = document.getElementById('yoyComparisonChart').getContext('2d');
-            const yearlyMonthlyRevenue = {}; // { 'YYYY': { 'MM': revenue } }
-
-            rawData.forEach(row => { // Use rawData for full year comparison
-                if (!yearlyMonthlyRevenue[row.Ano]) {
-                    yearlyMonthlyRevenue[row.Ano] = {};
-                    for (let m = 1; m <= 12; m++) yearlyMonthlyRevenue[row.Ano][m] = 0;
-                }
-                yearlyMonthlyRevenue[row.Ano][row.Mês] += row.Valor;
+        // Chart 18: Year over Year Comparison
+        function createYoYChart() {
+            const years = [...new Set(filteredData.map(d => d.ano))].sort();
+            const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            
+            const datasets = years.map((year, index) => {
+                const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444'];
+                return {
+                    label: year.toString(),
+                    data: months.map(month => {
+                        const monthRecords = filteredData.filter(d => d.ano === year && d.mes === month);
+                        return monthRecords.reduce((sum, d) => sum + (d.valor || 0), 0);
+                    }),
+                    backgroundColor: colors[index % colors.length]
+                };
             });
-
-            const availableYears = Object.keys(yearlyMonthlyRevenue).sort();
-            const labels = Array.from({ length: 12 }, (_, i) => getMonthName(i + 1));
-
-            const datasets = availableYears.map((year, i) => ({
-                label: `Faturamento ${year}`,
-                data: labels.map((_, monthIdx) => yearlyMonthlyRevenue[year][monthIdx + 1] || 0),
-                backgroundColor: getChartColors(i),
-                borderColor: getChartBorderColors(i),
-                borderWidth: 1
-            }));
-
-            charts.yoyComparisonChart = new Chart(ctx, {
+            
+            const ctx = document.getElementById('chart-yoy').getContext('2d');
+            charts.yoy = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: months.map(m => getMonthName(m)),
                     datasets: datasets
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Comparativo Anual de Faturamento (YoY)',
-                            color: varColor('--text-color')
-                        },
+                        legend: { display: true },
                         tooltip: {
-                            mode: 'index',
-                            intersect: false,
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
-                                    return label;
-                                }
+                                label: context => context.dataset.label + ': ' + formatCurrency(context.parsed.y)
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            title: { display: true, text: 'Mês', color: varColor('--chart-text-color') },
-                            ticks: { color: varColor('--chart-text-color') },
-                            grid: { color: varColor('--chart-grid-color') }
-                        },
                         y: {
-                            title: { display: true, text: 'Valor (R$)', color: varColor('--chart-text-color') },
+                            beginAtZero: true,
                             ticks: {
-                                callback: function(value) { return formatCurrency(value); },
-                                color: varColor('--chart-text-color')
-                            },
-                            grid: { color: varColor('--chart-grid-color') },
-                            beginAtZero: true
+                                callback: value => formatCurrency(value)
+                            }
                         }
                     }
                 }
             });
         }
 
-        // Helper to get CSS variable color, with optional alpha for transparency
-        function varColor(varName, alpha = 1) {
-            const color = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-            if (alpha === 1) return color;
-            // Convert hex to rgba if necessary
-            if (color.startsWith('#')) {
-                let r = parseInt(color.slice(1, 3), 16);
-                let g = parseInt(color.slice(3, 5), 16);
-                let b = parseInt(color.slice(5, 7), 16);
-                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-            }
-            // Assume it's already rgba or rgb
-            return color.replace(/rgb\((.+)\)/, `rgba($1, ${alpha})`);
+        // Utility Functions
+        function groupBy(array, keyFn) {
+            return array.reduce((result, item) => {
+                const key = keyFn(item);
+                if (!result[key]) result[key] = [];
+                result[key].push(item);
+                return result;
+            }, {});
         }
 
-        // --- Event Listeners ---
-        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-        document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
-        document.getElementById('clearFiltersBtn').addEventListener('click', clearFilters);
-
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', () => {
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                document.getElementById(button.dataset.tab).classList.add('active');
-
-                // Re-render charts for the newly active tab
-                renderDashboard();
-            });
-        });
-
-        // Initial dashboard render (empty until data is loaded)
-        renderDashboard();
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value || 0);
+        }
     </script>
 </body>
 </html>
