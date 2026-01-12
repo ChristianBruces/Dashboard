@@ -4,65 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Reino da Barba</title>
-    <!-- Bootstrap CSS CDN -->
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <!-- Chart.js Datalabels Plugin CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <!-- Custom CSS for Barbershop Theme -->
     <style>
         :root {
-            --primary-bg: #1a1a1a;
-            --secondary-bg: #2a2a2a;
-            --text-color: #f8f9fa;
-            --accent-color: #d4af37; /* Gold */
-            --card-bg: #343a40;
-            --border-color: #495057;
-            --filter-bg: #212529;
-            --table-header-bg: #495057;
-            --table-row-bg-odd: #343a40;
+            --primary-bg: #1a1a1a; /* Dark background */
+            --secondary-bg: #2a2a2a; /* Slightly lighter dark */
+            --text-color: #f0f0f0; /* Light text */
+            --accent-color: #d4af37; /* Gold/Dourado */
+            --border-color: #444;
+            --card-bg: #333;
+            --table-header-bg: #444;
+            --table-row-bg-odd: #3a3a3a;
             --table-row-bg-even: #2a2a2a;
-            --table-text-color: #e9ecef; /* Light gray for table text */
-            --chart-grid-color: rgba(255, 255, 255, 0.1);
-            --chart-text-color: #f8f9fa;
-            --chart-tooltip-bg: rgba(0, 0, 0, 0.8);
-            --chart-tooltip-text: #f8f9fa;
+            --button-bg: #d4af37;
+            --button-text: #1a1a1a;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--primary-bg);
             color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
             margin: 0;
-            padding-top: 70px; /* Space for fixed navbar */
+            padding: 0;
         }
-
         .navbar {
             background-color: var(--secondary-bg) !important;
             border-bottom: 1px solid var(--border-color);
         }
-        .navbar-brand, .nav-link {
-            color: var(--text-color) !important;
-        }
-        .navbar-brand:hover, .nav-link:hover {
+        .navbar-brand {
             color: var(--accent-color) !important;
+            font-weight: bold;
         }
-
         .container-fluid {
             padding: 20px;
         }
-
         .card {
             background-color: var(--card-bg);
+            color: var(--text-color);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
-            transition: transform 0.2s ease-in-out;
-        }
-        .card:hover {
-            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         .card-header {
             background-color: var(--table-header-bg);
@@ -73,151 +58,117 @@
         .card-body {
             padding: 15px;
         }
-        .kpi-value {
-            font-size: 2.2em;
-            font-weight: bold;
+        h1, h2, h3, h4, h5, h6 {
             color: var(--accent-color);
-            text-align: center;
-            margin-top: 10px;
+        }
+        .kpi-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--text-color);
         }
         .kpi-label {
             font-size: 0.9em;
-            color: var(--text-color);
-            text-align: center;
-            margin-bottom: 5px;
-        }
-
-        .filters-sidebar {
-            background-color: var(--filter-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px;
-        }
-        .filters-sidebar label {
-            color: var(--text-color);
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .filters-sidebar .form-control,
-        .filters-sidebar .form-select {
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            margin-bottom: 10px;
-        }
-        .filters-sidebar .form-control:focus,
-        .filters-sidebar .form-select:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
-            background-color: var(--card-bg); /* Keep background consistent */
-            color: var(--text-color);
-        }
-        .filters-sidebar .btn-primary {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-            color: var(--primary-bg);
-            font-weight: bold;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .filters-sidebar .btn-primary:hover {
-            background-color: #c0a030;
-            border-color: #c0a030;
-        }
-        .filters-sidebar .btn-secondary {
-            background-color: var(--border-color);
-            border-color: var(--border-color);
-            color: var(--text-color);
-            width: 100%;
-            margin-top: 10px;
-        }
-        .filters-sidebar .btn-secondary:hover {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px; /* Fixed height for consistency */
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .table-responsive {
-            margin-top: 20px;
-        }
-        .table {
-            background-color: var(--card-bg);
-            color: var(--table-text-color); /* Darker text for table content */
-            border: 1px solid var(--border-color);
-        }
-        .table thead {
-            background-color: var(--table-header-bg);
             color: var(--accent-color);
         }
-        .table th, .table td {
-            border-color: var(--border-color);
-            padding: 12px;
-            vertical-align: middle;
+        .form-label {
+            color: var(--text-color);
         }
-        .table tbody tr:nth-child(odd) {
-            background-color: var(--table-row-bg-odd);
+        .form-control, .form-select {
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
         }
-        .table tbody tr:nth-child(even) {
-            background-color: var(--table-row-bg-even);
-        }
-
-        .export-buttons .btn {
-            margin-right: 10px;
-            background-color: var(--accent-color);
+        .form-control:focus, .form-select:focus {
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
             border-color: var(--accent-color);
-            color: var(--primary-bg);
-            font-weight: bold;
+            box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
         }
-        .export-buttons .btn:hover {
-            background-color: #c0a030;
+        .btn-primary {
+            background-color: var(--button-bg);
+            border-color: var(--button-bg);
+            color: var(--button-text);
+        }
+        .btn-primary:hover {
+            background-color: #c0a030; /* Slightly darker gold */
             border-color: #c0a030;
         }
-
-        /* Chart.js specific styling */
-        .chartjs-render-monitor {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 10px;
+        .btn-secondary {
+            background-color: var(--secondary-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
         }
-
-        /* Responsive adjustments */
-        @media (max-width: 767.98px) {
-            .filters-sidebar {
-                margin-bottom: 30px;
-            }
+        .btn-secondary:hover {
+            background-color: #444;
+            border-color: #555;
+        }
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        .btn-info {
+            background-color: var(--info-color);
+            border-color: var(--info-color);
+        }
+        .table {
+            color: var(--text-color);
+        }
+        .table th {
+            background-color: var(--table-header-bg);
+            color: var(--accent-color);
+            border-color: var(--border-color);
+        }
+        .table td {
+            background-color: var(--table-row-bg-even);
+            border-color: var(--border-color);
+            color: #ccc; /* Slightly lighter text for table body */
+        }
+        .table tbody tr:nth-of-type(odd) td {
+            background-color: var(--table-row-bg-odd);
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: var(--table-row-bg-odd);
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px; /* Fixed height for charts */
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
             .kpi-value {
                 font-size: 1.8em;
             }
             .kpi-label {
                 font-size: 0.8em;
             }
+            .chart-container {
+                height: 250px;
+            }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="https://img.icons8.com/ios-filled/50/d4af37/barbershop.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
-                Reino da Barba Dashboard
-            </a>
+            <a class="navbar-brand" href="#">Dashboard Reino da Barba</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" id="theme-toggle">
-                            <img src="https://img.icons8.com/ios-filled/24/f8f9fa/moon-symbol.png" alt="Toggle Theme" width="20" height="20" class="d-inline-block align-text-top me-1">
-                            Dark Mode
-                        </a>
+                        <button class="btn btn-secondary btn-sm me-2" onclick="loadSampleData()">Carregar Dados de Exemplo</button>
+                    </li>
+                    <li class="nav-item">
+                        <input type="file" id="csvFileInput" accept=".csv" class="d-none" onchange="handleFileUpload(event)">
+                        <button class="btn btn-primary btn-sm" onclick="document.getElementById('csvFileInput').click()">Importar CSV</button>
                     </li>
                 </ul>
             </div>
@@ -225,928 +176,68 @@
     </nav>
 
     <div class="container-fluid">
-        <div class="row">
-            <!-- Filters Sidebar -->
-            <div class="col-lg-3 col-md-4">
-                <div class="filters-sidebar sticky-top" style="top: 90px;">
-                    <h4 class="text-center mb-4" style="color: var(--accent-color);">Filtros</h4>
-                    <div class="mb-3">
-                        <label for="filterStartDate" class="form-label">Data Inicial:</label>
-                        <input type="date" class="form-control" id="filterStartDate">
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterEndDate" class="form-label">Data Final:</label>
-                        <input type="date" class="form-control" id="filterEndDate">
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterYear" class="form-label">Ano:</label>
-                        <select class="form-select" id="filterYear" multiple>
-                            <!-- Options will be populated by JS -->
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterMonth" class="form-label">Mês:</label>
-                        <select class="form-select" id="filterMonth" multiple>
-                            <option value="0">Janeiro</option>
-                            <option value="1">Fevereiro</option>
-                            <option value="2">Março</option>
-                            <option value="3">Abril</option>
-                            <option value="4">Maio</option>
-                            <option value="5">Junho</option>
-                            <option value="6">Julho</option>
-                            <option value="7">Agosto</option>
-                            <option value="8">Setembro</option>
-                            <option value="9">Outubro</option>
-                            <option value="10">Novembro</option>
-                            <option value="11">Dezembro</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterQuinzena" class="form-label">Quinzena:</label>
-                        <select class="form-select" id="filterQuinzena" multiple>
-                            <option value="Primeira">Primeira</option>
-                            <option value="Segunda">Segunda</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterDayOfWeek" class="form-label">Dia da Semana:</label>
-                        <select class="form-select" id="filterDayOfWeek" multiple>
-                            <option value="Dom">Domingo</option>
-                            <option value="Seg">Segunda</option>
-                            <option value="Ter">Terça</option>
-                            <option value="Qua">Quarta</option>
-                            <option value="Qui">Quinta</option>
-                            <option value="Sex">Sexta</option>
-                            <option value="Sab">Sábado</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterService" class="form-label">Serviço:</label>
-                        <select class="form-select" id="filterService" multiple>
-                            <option value="CABELO">CABELO</option>
-                            <option value="BARBA">BARBA</option>
-                            <option value="COMBO CABELO+BARBA">COMBO CABELO+BARBA</option>
-                            <option value="SOBRANCELHA">SOBRANCELHA</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterPayment" class="form-label">Forma de Pagamento:</label>
-                        <select class="form-select" id="filterPayment" multiple>
-                            <option value="PIX">PIX</option>
-                            <option value="CRÉDITO">CRÉDITO</option>
-                            <option value="DÉBITO">DÉBITO</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary" id="applyFiltersBtn">Aplicar Filtros</button>
-                    <button class="btn btn-secondary" id="clearFiltersBtn">Limpar Filtros</button>
-                </div>
-            </div>
+        <div id="feedbackMessage" class="alert d-none" role="alert"></div>
 
-            <!-- Main Dashboard Content -->
-            <div class="col-lg-9 col-md-8">
-                <!-- KPIs Section -->
-                <div class="row mb-4">
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="kpi-label">Faturamento Total</div>
-                                <div class="kpi-value" id="kpiFaturamentoTotal">R$ 0,00</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="kpi-label">Total de Clientes</div>
-                                <div class="kpi-value" id="kpiTotalClientes">0</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="kpi-label">Ticket Médio</div>
-                                <div class="kpi-value" id="kpiTicketMedio">R$ 0,00</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="kpi-label">Crescimento Mês a Mês</div>
-                                <div class="kpi-value" id="kpiCrescimentoMes">%</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="kpi-label">Comissão Jean Total</div>
-                                <div class="kpi-value" id="kpiComissaoJean">R$ 0,00</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="kpi-label">Comissão Salão Total</div>
-                                <div class="kpi-value" id="kpiComissaoSalao">R$ 0,00</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="kpi-label">Meta Atingida</div>
-                                <div class="kpi-value" id="kpiMetaAtingida">%</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="kpi-label">Taxa de Conversão</div>
-                                <div class="kpi-value" id="kpiTaxaConversao">%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts Section -->
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header">Faturamento e Clientes Mensal</div>
-                            <div class="card-body chart-container">
-                                <canvas id="faturamentoClientesMensalChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header">Receita por Tipo de Serviço</div>
-                            <div class="card-body chart-container">
-                                <canvas id="receitaServicoChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header">Quantidade de Serviços</div>
-                            <div class="card-body chart-container">
-                                <canvas id="quantidadeServicosChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header">Receita por Forma de Pagamento</div>
-                            <div class="card-body chart-container">
-                                <canvas id="receitaPagamentoChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header">Faturamento por Dia da Semana</div>
-                            <div class="card-body chart-container">
-                                <canvas id="faturamentoDiaSemanaChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header">Clientes vs Meta</div>
-                            <div class="card-body chart-container">
-                                <canvas id="clientesMetaChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header">Comissão Jean vs Salão</div>
-                            <div class="card-body chart-container">
-                                <canvas id="comissaoJeanSalaoChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header">Evolução de Pagamentos</div>
-                            <div class="card-body chart-container">
-                                <canvas id="evolucaoPagamentosChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Monthly Summary Table -->
-                <div class="card mb-4">
-                    <div class="card-header">Resumo Mensal</div>
+        <!-- KPIs Section -->
+        <h2 class="mt-4 mb-3">Indicadores Chave</h2>
+        <div class="row text-center">
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Mês/Ano</th>
-                                        <th>Faturamento</th>
-                                        <th>Clientes</th>
-                                        <th>Ticket Médio</th>
-                                        <th>Meta Faturamento</th>
-                                        <th>% Meta Faturamento</th>
-                                        <th>Meta Clientes</th>
-                                        <th>% Meta Clientes</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="monthlySummaryTableBody">
-                                    <!-- Table rows will be populated by JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Export Buttons -->
-                <div class="card mb-4">
-                    <div class="card-header">Exportar Dados</div>
-                    <div class="card-body export-buttons">
-                        <button class="btn" id="exportCsvBtn">Exportar CSV</button>
-                        <button class="btn" id="exportJsonBtn">Exportar JSON</button>
+                        <div class="kpi-value" id="kpiFaturamentoTotal">R$ 0,00</div>
+                        <div class="kpi-label">Faturamento Total</div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script>
-        Chart.register(ChartDataLabels); // Register the datalabels plugin
-
-        // Global variables
-        let rawData = [];
-        let filteredData = [];
-        let charts = {};
-        const MONTH_NAMES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-        const DAY_NAMES = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
-
-        // --- Helper Functions ---
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-        }
-
-        function formatPercentage(value) {
-            return new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value / 100);
-        }
-
-        function getUniqueValues(data, key) {
-            return [...new Set(data.map(item => item[key]))].sort();
-        }
-
-        function getSelectedValues(selectElementId) {
-            const select = document.getElementById(selectElementId);
-            return Array.from(select.selectedOptions).map(option => option.value);
-        }
-
-        function getChartDefaults() {
-            return {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: 'var(--chart-text-color)'
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'var(--chart-tooltip-bg)',
-                        titleColor: 'var(--chart-tooltip-text)',
-                        bodyColor: 'var(--chart-tooltip-text)',
-                        borderColor: 'var(--accent-color)',
-                        borderWidth: 1
-                    },
-                    datalabels: {
-                        color: 'var(--chart-text-color)',
-                        font: {
-                            weight: 'bold'
-                        },
-                        formatter: (value, context) => {
-                            if (context.chart.config.type === 'pie' || context.chart.config.type === 'doughnut') {
-                                let sum = context.dataset.data.reduce((a, b) => a + b, 0);
-                                let percentage = (value * 100 / sum).toFixed(1) + '%';
-                                return percentage;
-                            }
-                            return value;
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: { color: 'var(--chart-text-color)' },
-                        grid: { color: 'var(--chart-grid-color)' }
-                    },
-                    y: {
-                        ticks: { color: 'var(--chart-text-color)' },
-                        grid: { color: 'var(--chart-grid-color)' }
-                    }
-                }
-            };
-        }
-
-        // --- Data Generation ---
-        function generateSampleData() {
-            const data = [];
-            const startDate = new Date('2024-11-01');
-            const endDate = new Date('2026-01-31');
-            const services = ['CABELO', 'BARBA', 'COMBO CABELO+BARBA', 'SOBRANCELHA'];
-            const serviceValues = {
-                'CABELO': 40, 'BARBA': 30, 'COMBO CABELO+BARBA': 60, 'SOBRANCELHA': 20
-            };
-            const payments = ['PIX', 'CRÉDITO', 'DÉBITO'];
-            const clientNames = Array.from({ length: 2000 }, (_, i) => `Cliente ${i + 1}`); // More clients than transactions
-
-            let currentDate = new Date(startDate);
-            let transactionCount = 0;
-            const maxTransactions = 1895;
-
-            const monthlyMetas = {}; // Store monthly metas to ensure consistency
-
-            while (currentDate <= endDate && transactionCount < maxTransactions) {
-                const year = currentDate.getFullYear();
-                const month = currentDate.getMonth(); // 0-11
-                const day = currentDate.getDate();
-                const dayOfWeek = DAY_NAMES[currentDate.getDay()];
-                const quinzena = day <= 15 ? 'Primeira' : 'Segunda';
-
-                const monthKey = `${year}-${month}`;
-                if (!monthlyMetas[monthKey]) {
-                    monthlyMetas[monthKey] = {
-                        meta_mensal: Math.floor(Math.random() * (2000 - 1000 + 1) + 1000) * 10, // R$10k-20k
-                        meta_clientes: Math.floor(Math.random() * (100 - 50 + 1) + 50) // 50-100 clients
-                    };
-                }
-
-                const numTransactionsToday = Math.floor(Math.random() * (5 - 3 + 1)) + 3; // 3-5 transactions per day
-
-                for (let i = 0; i < numTransactionsToday && transactionCount < maxTransactions; i++) {
-                    const service = services[Math.floor(Math.random() * services.length)];
-                    const valor = serviceValues[service] + (Math.random() * 10 - 5); // Add some variation
-                    const pagto = payments[Math.floor(Math.random() * payments.length)];
-                    const comissaoJean = valor * 0.5; // 50%
-                    const comissaoReinoDaBarba = valor * 0.5; // 50%
-                    const client = clientNames[Math.floor(Math.random() * clientNames.length)];
-
-                    data.push({
-                        ano: year,
-                        mes: month,
-                        dia: day,
-                        dia_semana: dayOfWeek,
-                        quinzenas: quinzena,
-                        cliente: client,
-                        servico: service,
-                        valor: parseFloat(valor.toFixed(2)),
-                        pagto: pagto,
-                        comissao_jean: parseFloat(comissaoJean.toFixed(2)),
-                        comissao_reino_da_barba: parseFloat(comissaoReinoDaBarba.toFixed(2)),
-                        meta_mensal: monthlyMetas[monthKey].meta_mensal,
-                        meta_clientes: monthlyMetas[monthKey].meta_clientes,
-                        data_completa: new Date(year, month, day) // For date filtering
-                    });
-                    transactionCount++;
-                }
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-            return data;
-        }
-
-        // --- Filter Logic ---
-        function applyFilters() {
-            const startDate = document.getElementById('filterStartDate').value;
-            const endDate = document.getElementById('filterEndDate').value;
-            const selectedYears = getSelectedValues('filterYear').map(Number);
-            const selectedMonths = getSelectedValues('filterMonth').map(Number);
-            const selectedQuinzenas = getSelectedValues('filterQuinzena');
-            const selectedDaysOfWeek = getSelectedValues('filterDayOfWeek');
-            const selectedServices = getSelectedValues('filterService');
-            const selectedPayments = getSelectedValues('filterPayment');
-
-            filteredData = rawData.filter(item => {
-                const itemDate = item.data_completa;
-                const itemYear = item.ano;
-                const itemMonth = item.mes;
-                const itemDayOfWeek = item.dia_semana;
-                const itemQuinzena = item.quinzenas;
-                const itemService = item.servico;
-                const itemPayment = item.pagto;
-
-                // Date range filter
-                if (startDate && itemDate < new Date(startDate)) return false;
-                if (endDate && itemDate > new Date(endDate)) return false;
-
-                // Multi-select filters
-                if (selectedYears.length > 0 && !selectedYears.includes(itemYear)) return false;
-                if (selectedMonths.length > 0 && !selectedMonths.includes(itemMonth)) return false;
-                if (selectedQuinzenas.length > 0 && !selectedQuinzenas.includes(itemQuinzena)) return false;
-                if (selectedDaysOfWeek.length > 0 && !selectedDaysOfWeek.includes(itemDayOfWeek)) return false;
-                if (selectedServices.length > 0 && !selectedServices.includes(itemService)) return false;
-                if (selectedPayments.length > 0 && !selectedPayments.includes(itemPayment)) return false;
-
-                return true;
-            });
-
-            updateKPIs();
-            updateCharts();
-            updateMonthlySummaryTable();
-        }
-
-        function clearFilters() {
-            document.getElementById('filterStartDate').value = '';
-            document.getElementById('filterEndDate').value = '';
-            document.getElementById('filterYear').value = '';
-            document.getElementById('filterMonth').value = '';
-            document.getElementById('filterQuinzena').value = '';
-            document.getElementById('filterDayOfWeek').value = '';
-            document.getElementById('filterService').value = '';
-            document.getElementById('filterPayment').value = '';
-            applyFilters();
-        }
-
-        // --- KPI Updates ---
-        function updateKPIs() {
-            const totalFaturamento = filteredData.reduce((sum, item) => sum + item.valor, 0);
-            const uniqueClients = new Set(filteredData.map(item => item.cliente)).size;
-            const ticketMedio = uniqueClients > 0 ? totalFaturamento / uniqueClients : 0;
-
-            // For growth and meta KPIs, we need monthly aggregated data
-            const monthlyData = aggregateByMonth(filteredData);
-            const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            });
-
-            let crescimentoMes = 0;
-            if (sortedMonths.length >= 2) {
-                const currentMonthKey = sortedMonths[sortedMonths.length - 1];
-                const prevMonthKey = sortedMonths[sortedMonths.length - 2];
-                const currentMonthFaturamento = monthlyData[currentMonthKey].faturamento;
-                const prevMonthFaturamento = monthlyData[prevMonthKey].faturamento;
-                if (prevMonthFaturamento > 0) {
-                    crescimentoMes = ((currentMonthFaturamento - prevMonthFaturamento) / prevMonthFaturamento) * 100;
-                }
-            }
-
-            const totalMetaFaturamento = Object.values(monthlyData).reduce((sum, month) => sum + month.meta_mensal, 0);
-            const metaAtingida = totalMetaFaturamento > 0 ? (totalFaturamento / totalMetaFaturamento) * 100 : 0;
-
-            const totalMetaClientes = Object.values(monthlyData).reduce((sum, month) => sum + month.meta_clientes, 0);
-            const taxaConversao = totalMetaClientes > 0 ? (uniqueClients / totalMetaClientes) * 100 : 0;
-
-            const comissaoJeanTotal = filteredData.reduce((sum, item) => sum + item.comissao_jean, 0);
-            const comissaoSalaoTotal = filteredData.reduce((sum, item) => sum + item.comissao_reino_da_barba, 0);
-
-            document.getElementById('kpiFaturamentoTotal').textContent = formatCurrency(totalFaturamento);
-            document.getElementById('kpiTotalClientes').textContent = uniqueClients.toLocaleString('pt-BR');
-            document.getElementById('kpiTicketMedio').textContent = formatCurrency(ticketMedio);
-            document.getElementById('kpiCrescimentoMes').textContent = formatPercentage(crescimentoMes);
-            document.getElementById('kpiCrescimentoMes').style.color = crescimentoMes >= 0 ? 'lightgreen' : 'salmon';
-            document.getElementById('kpiComissaoJean').textContent = formatCurrency(comissaoJeanTotal);
-            document.getElementById('kpiComissaoSalao').textContent = formatCurrency(comissaoSalaoTotal);
-            document.getElementById('kpiMetaAtingida').textContent = formatPercentage(metaAtingida);
-            document.getElementById('kpiMetaAtingida').style.color = metaAtingida >= 100 ? 'lightgreen' : 'salmon';
-            document.getElementById('kpiTaxaConversao').textContent = formatPercentage(taxaConversao);
-            document.getElementById('kpiTaxaConversao').style.color = taxaConversao >= 100 ? 'lightgreen' : 'salmon';
-        }
-
-        // --- Chart Updates ---
-        function updateCharts() {
-            const chartDefaults = getChartDefaults();
-
-            // Chart 1: Faturamento e Clientes Mensal
-            const monthlyData = aggregateByMonth(filteredData);
-            const labels = Object.keys(monthlyData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => `${MONTH_NAMES[monthlyData[key].mes.split('-')[1]]}/${monthlyData[key].ano}`);
-            const faturamentoData = Object.keys(monthlyData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => monthlyData[key].faturamento);
-            const clientesData = Object.keys(monthlyData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => monthlyData[key].clientes);
-
-            if (charts.faturamentoClientesMensalChart) charts.faturamentoClientesMensalChart.destroy();
-            charts.faturamentoClientesMensalChart = new Chart(document.getElementById('faturamentoClientesMensalChart'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Faturamento (R$)',
-                            data: faturamentoData,
-                            backgroundColor: 'var(--accent-color)',
-                            borderColor: 'var(--accent-color)',
-                            yAxisID: 'y',
-                            order: 2
-                        },
-                        {
-                            label: 'Clientes',
-                            data: clientesData,
-                            type: 'line',
-                            borderColor: 'rgba(100, 149, 237, 1)', // CornflowerBlue
-                            backgroundColor: 'rgba(100, 149, 237, 0.2)',
-                            fill: true,
-                            yAxisID: 'y1',
-                            order: 1
-                        }
-                    ]
-                },
-                options: {
-                    ...chartDefaults,
-                    scales: {
-                        x: { ...chartDefaults.scales.x },
-                        y: {
-                            ...chartDefaults.scales.y,
-                            type: 'linear',
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Faturamento (R$)',
-                                color: 'var(--chart-text-color)'
-                            }
-                        },
-                        y1: {
-                            ...chartDefaults.scales.y,
-                            type: 'linear',
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            title: {
-                                display: true,
-                                text: 'Clientes',
-                                color: 'var(--chart-text-color)'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Chart 2: Receita por Tipo de Serviço
-            const receitaServico = filteredData.reduce((acc, item) => {
-                acc[item.servico] = (acc[item.servico] || 0) + item.valor;
-                return acc;
-            }, {});
-            if (charts.receitaServicoChart) charts.receitaServicoChart.destroy();
-            charts.receitaServicoChart = new Chart(document.getElementById('receitaServicoChart'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(receitaServico),
-                    datasets: [{
-                        data: Object.values(receitaServico),
-                        backgroundColor: ['#d4af37', '#8b4513', '#a0522d', '#cd853f'], // Gold, SaddleBrown, Sienna, Peru
-                        borderColor: 'var(--card-bg)'
-                    }]
-                },
-                options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: { ...chartDefaults.plugins.datalabels, formatter: (value, ctx) => {
-                    let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                    let percentage = (value * 100 / sum).toFixed(1) + '%';
-                    return ctx.chart.data.labels[ctx.dataIndex] + '\n' + percentage;
-                }}}}
-            });
-
-            // Chart 3: Quantidade de Serviços
-            const quantidadeServicos = filteredData.reduce((acc, item) => {
-                acc[item.servico] = (acc[item.servico] || 0) + 1;
-                return acc;
-            }, {});
-            if (charts.quantidadeServicosChart) charts.quantidadeServicosChart.destroy();
-            charts.quantidadeServicosChart = new Chart(document.getElementById('quantidadeServicosChart'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(quantidadeServicos),
-                    datasets: [{
-                        label: 'Quantidade',
-                        data: Object.values(quantidadeServicos),
-                        backgroundColor: 'rgba(100, 149, 237, 0.8)', // CornflowerBlue
-                        borderColor: 'rgba(100, 149, 237, 1)'
-                    }]
-                },
-                options: chartDefaults
-            });
-
-            // Chart 4: Receita por Forma de Pagamento
-            const receitaPagamento = filteredData.reduce((acc, item) => {
-                acc[item.pagto] = (acc[item.pagto] || 0) + item.valor;
-                return acc;
-            }, {});
-            if (charts.receitaPagamentoChart) charts.receitaPagamentoChart.destroy();
-            charts.receitaPagamentoChart = new Chart(document.getElementById('receitaPagamentoChart'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(receitaPagamento),
-                    datasets: [{
-                        data: Object.values(receitaPagamento),
-                        backgroundColor: ['#20c997', '#0dcaf0', '#6f42c1'], // Teal, Info, Purple
-                        borderColor: 'var(--card-bg)'
-                    }]
-                },
-                options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: { ...chartDefaults.plugins.datalabels, formatter: (value, ctx) => {
-                    let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                    let percentage = (value * 100 / sum).toFixed(1) + '%';
-                    return ctx.chart.data.labels[ctx.dataIndex] + '\n' + percentage;
-                }}}}
-            });
-
-            // Chart 5: Faturamento por Dia da Semana
-            const faturamentoDiaSemana = filteredData.reduce((acc, item) => {
-                acc[item.dia_semana] = (acc[item.dia_semana] || 0) + item.valor;
-                return acc;
-            }, {});
-            const sortedDays = DAY_NAMES.filter(day => faturamentoDiaSemana[day]); // Only show days with data
-            const faturamentoDiaSemanaData = sortedDays.map(day => faturamentoDiaSemana[day]);
-            if (charts.faturamentoDiaSemanaChart) charts.faturamentoDiaSemanaChart.destroy();
-            charts.faturamentoDiaSemanaChart = new Chart(document.getElementById('faturamentoDiaSemanaChart'), {
-                type: 'bar',
-                data: {
-                    labels: sortedDays,
-                    datasets: [{
-                        label: 'Faturamento (R$)',
-                        data: faturamentoDiaSemanaData,
-                        backgroundColor: 'rgba(255, 99, 132, 0.8)', // Red
-                        borderColor: 'rgba(255, 99, 132, 1)'
-                    }]
-                },
-                options: chartDefaults
-            });
-
-            // Chart 6: Clientes vs Meta
-            const clientesMetaLabels = Object.keys(monthlyData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => `${MONTH_NAMES[monthlyData[key].mes.split('-')[1]]}/${monthlyData[key].ano}`);
-            const clientesReal = Object.keys(monthlyData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => monthlyData[key].clientes);
-            const clientesMeta = Object.keys(monthlyData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => monthlyData[key].meta_clientes);
-
-            if (charts.clientesMetaChart) charts.clientesMetaChart.destroy();
-            charts.clientesMetaChart = new Chart(document.getElementById('clientesMetaChart'), {
-                type: 'bar',
-                data: {
-                    labels: clientesMetaLabels,
-                    datasets: [
-                        {
-                            label: 'Clientes Reais',
-                            data: clientesReal,
-                            backgroundColor: 'rgba(255, 206, 86, 0.8)', // Yellow
-                            borderColor: 'rgba(255, 206, 86, 1)',
-                            order: 2
-                        },
-                        {
-                            label: 'Meta de Clientes',
-                            data: clientesMeta,
-                            type: 'line',
-                            borderColor: 'rgba(75, 192, 192, 1)', // Green
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            fill: false,
-                            order: 1
-                        }
-                    ]
-                },
-                options: chartDefaults
-            });
-
-            // Chart 7: Comissão Jean vs Salão
-            const comissaoJean = filteredData.reduce((sum, item) => sum + item.comissao_jean, 0);
-            const comissaoSalao = filteredData.reduce((sum, item) => sum + item.comissao_reino_da_barba, 0);
-            if (charts.comissaoJeanSalaoChart) charts.comissaoJeanSalaoChart.destroy();
-            charts.comissaoJeanSalaoChart = new Chart(document.getElementById('comissaoJeanSalaoChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['Comissão Jean', 'Comissão Salão'],
-                    datasets: [{
-                        label: 'Valor (R$)',
-                        data: [comissaoJean, comissaoSalao],
-                        backgroundColor: ['var(--accent-color)', 'rgba(100, 149, 237, 0.8)'],
-                        borderColor: ['var(--accent-color)', 'rgba(100, 149, 237, 1)']
-                    }]
-                },
-                options: chartDefaults
-            });
-
-            // Chart 8: Evolução de Pagamentos (Stacked Bar)
-            const monthlyPaymentData = aggregateMonthlyPayment(filteredData);
-            const paymentLabels = Object.keys(monthlyPaymentData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => `${MONTH_NAMES[monthlyPaymentData[key].mes.split('-')[1]]}/${monthlyPaymentData[key].ano}`);
-
-            const pixData = Object.keys(monthlyPaymentData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => monthlyPaymentData[key].PIX || 0);
-            const creditoData = Object.keys(monthlyPaymentData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => monthlyPaymentData[key].CRÉDITO || 0);
-            const debitoData = Object.keys(monthlyPaymentData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            }).map(key => monthlyPaymentData[key].DÉBITO || 0);
-
-            if (charts.evolucaoPagamentosChart) charts.evolucaoPagamentosChart.destroy();
-            charts.evolucaoPagamentosChart = new Chart(document.getElementById('evolucaoPagamentosChart'), {
-                type: 'bar',
-                data: {
-                    labels: paymentLabels,
-                    datasets: [
-                        {
-                            label: 'PIX',
-                            data: pixData,
-                            backgroundColor: '#20c997',
-                            borderColor: '#20c997'
-                        },
-                        {
-                            label: 'CRÉDITO',
-                            data: creditoData,
-                            backgroundColor: '#0dcaf0',
-                            borderColor: '#0dcaf0'
-                        },
-                        {
-                            label: 'DÉBITO',
-                            data: debitoData,
-                            backgroundColor: '#6f42c1',
-                            borderColor: '#6f42c1'
-                        }
-                    ]
-                },
-                options: {
-                    ...chartDefaults,
-                    scales: {
-                        x: { ...chartDefaults.scales.x, stacked: true },
-                        y: { ...chartDefaults.scales.y, stacked: true }
-                    }
-                }
-            });
-        }
-
-        // --- Aggregation Functions ---
-        function aggregateByMonth(data) {
-            const aggregated = {};
-            data.forEach(item => {
-                const monthKey = `${item.ano}-${item.mes}`;
-                if (!aggregated[monthKey]) {
-                    aggregated[monthKey] = {
-                        ano: item.ano,
-                        mes: item.mes,
-                        faturamento: 0,
-                        clientes: new Set(),
-                        meta_mensal: item.meta_mensal, // Assuming meta is consistent per month
-                        meta_clientes: item.meta_clientes // Assuming meta is consistent per month
-                    };
-                }
-                aggregated[monthKey].faturamento += item.valor;
-                aggregated[monthKey].clientes.add(item.cliente);
-            });
-            // Convert Set to size for clients
-            for (const key in aggregated) {
-                aggregated[key].clientes = aggregated[key].clientes.size;
-            }
-            return aggregated;
-        }
-
-        function aggregateMonthlyPayment(data) {
-            const aggregated = {};
-            data.forEach(item => {
-                const monthKey = `${item.ano}-${item.mes}`;
-                if (!aggregated[monthKey]) {
-                    aggregated[monthKey] = {
-                        ano: item.ano,
-                        mes: item.mes,
-                        PIX: 0,
-                        CRÉDITO: 0,
-                        DÉBITO: 0
-                    };
-                }
-                aggregated[monthKey][item.pagto] += item.valor;
-            });
-            return aggregated;
-        }
-
-        // --- Monthly Summary Table ---
-        function updateMonthlySummaryTable() {
-            const tableBody = document.getElementById('monthlySummaryTableBody');
-            tableBody.innerHTML = ''; // Clear existing rows
-
-            const monthlyData = aggregateByMonth(filteredData);
-            const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
-                const [yearA, monthA] = a.split('-').map(Number);
-                const [yearB, monthB] = b.split('-').map(Number);
-                return new Date(yearA, monthA) - new Date(yearB, monthB);
-            });
-
-            sortedMonths.forEach(monthKey => {
-                const monthInfo = monthlyData[monthKey];
-                const faturamento = monthInfo.faturamento;
-                const clientes = monthInfo.clientes;
-                const ticketMedio = clientes > 0 ? faturamento / clientes : 0;
-                const metaFaturamento = monthInfo.meta_mensal;
-                const percentMetaFaturamento = metaFaturamento > 0 ? (faturamento / metaFaturamento) * 100 : 0;
-                const metaClientes = monthInfo.meta_clientes;
-                const percentMetaClientes = metaClientes > 0 ? (clientes / metaClientes) * 100 : 0;
-
-                const row = tableBody.insertRow();
-                row.innerHTML = `
-                    <td>${MONTH_NAMES[monthInfo.mes]}/${monthInfo.ano}</td>
-                    <td>${formatCurrency(faturamento)}</td>
-                    <td>${clientes.toLocaleString('pt-BR')}</td>
-                    <td>${formatCurrency(ticketMedio)}</td>
-                    <td>${formatCurrency(metaFaturamento)}</td>
-                    <td style="color: ${percentMetaFaturamento >= 100 ? 'lightgreen' : 'salmon'};">${formatPercentage(percentMetaFaturamento)}</td>
-                    <td>${metaClientes.toLocaleString('pt-BR')}</td>
-                    <td style="color: ${percentMetaClientes >= 100 ? 'lightgreen' : 'salmon'};">${formatPercentage(percentMetaClientes)}</td>
-                `;
-            });
-        }
-
-        // --- Export Functions ---
-        function exportToCSV() {
-            if (filteredData.length === 0) {
-                alert('Nenhum dado para exportar.');
-                return;
-            }
-
-            const headers = Object.keys(filteredData[0]);
-            const csv = [
-                headers.join(','),
-                ...filteredData.map(row => headers.map(fieldName => JSON.stringify(row[fieldName])).join(','))
-            ].join('\n');
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'reino_da_barba_dashboard.csv';
-            link.click();
-        }
-
-        function exportToJSON() {
-            if (filteredData.length === 0) {
-                alert('Nenhum dado para exportar.');
-                return;
-            }
-
-            const json = JSON.stringify(filteredData, null, 2);
-            const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'reino_da_barba_dashboard.json';
-            link.click();
-        }
-
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Populate filter options
-            const allYears = getUniqueValues(generateSampleData(), 'ano'); // Use rawData for initial filter options
-            const filterYearSelect = document.getElementById('filterYear');
-            allYears.forEach(year => {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                filterYearSelect.appendChild(option);
-            });
-
-            rawData = generateSampleData(); // Generate initial data
-            applyFilters(); // Apply filters initially to load all data
-
-            // Event Listeners
-            document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
-            document.getElementById('clearFiltersBtn').addEventListener('click', clearFilters);
-            document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
-            document.getElementById('exportJsonBtn').addEventListener('click', exportToJSON);
-
-            // Theme Toggle
-            document.getElementById('theme-toggle').addEventListener('click', (e) => {
-                e.preventDefault();
-                document.body.classList.toggle('light-mode');
-                // Update chart colors if theme changes
-                updateCharts();
-            });
-        });
-    </script>
-</body>
-</html>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="kpi-value" id="kpiTotalClientes">0</div>
+                        <div class="kpi-label">Total de Clientes</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="kpi-value" id="kpiTicketMedio">R$ 0,00</div>
+                        <div class="kpi-label">Ticket Médio</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="kpi-value" id="kpiCrescimentoMesAMes">0.00%</div>
+                        <div class="kpi-label">Crescimento Mês a Mês</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="kpi-value" id="kpiComissaoJean">R$ 0,00</div>
+                        <div class="kpi-label">Comissão Jean</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="kpi-value" id="kpiComissaoSalao">R$ 0,00</div>
+                        <div class="kpi-label">Comissão Salão</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="kpi-value" id="kpiMetaAtingida">0.00%</div>
+                        <div class="kpi-label">Meta Atingida</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="kpi-value" id="kpiTaxaConversao">0
