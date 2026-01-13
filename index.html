@@ -691,7 +691,7 @@
                 
                 if (dataInicio || dataFim) {
                     const rowDate = new Date(row.ano, row.mes - 1, row.dia);
-                    if (dataInicio && rowDate < new Date(dataInicio)) return false;
+                    if (dataInicio && rowDate &lt; new Date(dataInicio)) return false;
                     if (dataFim && rowDate > new Date(dataFim)) return false;
                 }
                 
@@ -1221,7 +1221,7 @@
             const frequencies = Object.values(clientCounts);
             const histogram = {};
             frequencies.forEach(freq => {
-                const bucket = freq === 1 ? '1' : freq === 2 ? '2' : freq === 3 ? '3' : freq <= 5 ? '4-5' : '6+';
+                const bucket = freq === 1 ? '1' : freq === 2 ? '2' : freq === 3 ? '3' : freq &lt;= 5 ? '4-5' : '6+';
                 histogram[bucket] = (histogram[bucket] || 0) + 1;
             });
             
