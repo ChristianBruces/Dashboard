@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Reino da Barba</title>
+    <title>Dashboard Reino da Barba - Production Ready</title>
     
-    <!-- CDN Libraries -->
+    <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
@@ -59,6 +59,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         body.dark-mode header {
@@ -72,11 +74,12 @@
 
         .header-actions {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
-        button, .file-upload-btn {
+        button {
             padding: 10px 20px;
             border: none;
             border-radius: 8px;
@@ -94,6 +97,16 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
 
         #theme-toggle {
@@ -295,7 +308,7 @@
             font-weight: 600;
         }
 
-        /* Loading & Error */
+        /* Loading & Messages */
         #loading-overlay {
             display: none;
             position: fixed;
@@ -327,17 +340,26 @@
             100% { transform: rotate(360deg); }
         }
 
-        .error-message {
-            background: var(--danger);
-            color: white;
-            padding: 15px;
+        .message {
+            padding: 15px 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             display: none;
+            font-weight: 600;
         }
 
-        .error-message.show {
+        .message.show {
             display: block;
+        }
+
+        .message.error {
+            background: var(--danger);
+            color: white;
+        }
+
+        .message.success {
+            background: var(--success);
+            color: white;
         }
 
         /* Responsive */
@@ -348,7 +370,6 @@
             
             header {
                 flex-direction: column;
-                gap: 15px;
             }
             
             .filters-grid {
@@ -356,12 +377,11 @@
             }
         }
 
-        /* Hide file input */
         #file-input {
             display: none;
         }
 
-        .file-stats {
+        .info-text {
             font-size: 14px;
             color: #64748b;
             margin-top: 10px;
@@ -380,6 +400,9 @@
             <h1>💈 Dashboard Reino da Barba</h1>
             <div class="header-actions">
                 <button id="theme-toggle">🌙 Modo Escuro</button>
+                <button class="btn-success" onclick="downloadTemplate()">
+                    📥 Baixar Template Excel
+                </button>
                 <button class="btn-primary" onclick="document.getElementById('file-input').click()">
                     📁 Carregar Arquivo
                 </button>
@@ -387,11 +410,9 @@
             </div>
         </header>
 
-        <!-- Error Message -->
-        <div id="error-message" class="error-message"></div>
-
-        <!-- File Stats -->
-        <div id="file-stats" class="file-stats" style="display:none;"></div>
+        <!-- Messages -->
+        <div id="error-message" class="message error"></div>
+        <div id="success-message" class="message success"></div>
 
         <!-- Filters -->
         <div class="filters-section">
@@ -430,7 +451,7 @@
                     <input type="date" id="filter-data-fim">
                 </div>
             </div>
-            <div style="margin-top: 15px;">
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
                 <button class="btn-primary" onclick="applyFilters()">Aplicar Filtros</button>
                 <button onclick="clearFilters()">Limpar Filtros</button>
             </div>
@@ -555,13 +576,12 @@
             const isDark = document.body.classList.contains('dark-mode');
             this.textContent = isDark ? '☀️ Modo Claro' : '🌙 Modo Escuro';
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            // Recreate charts with new theme
             if (rawData.length > 0) {
                 createAllCharts();
             }
         });
 
-        // Load theme from localStorage
+        // Load theme
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
             document.getElementById('theme-toggle').textContent = '☀️ Modo Claro';
@@ -577,13 +597,71 @@
             });
         });
 
+        // Download Template
+        function downloadTemplate() {
+            const templateData = [
+                {
+                    ano: 2024,
+                    mes: 11,
+                    dia: 1,
+                    dia_semana: 'sexta',
+                    quinzenas: '1ª quinzena',
+                    cliente: 'João Silva',
+                    servico: 'CABELO',
+                    valor: 45,
+                    pagto: 'PIX',
+                    comissao_jean: 22.5,
+                    comissao_reino_da_barba: 22.5,
+                    meta_mensal: 10000,
+                    meta_clientes: 200
+                },
+                {
+                    ano: 2024,
+                    mes: 11,
+                    dia: 1,
+                    dia_semana: 'sexta',
+                    quinzenas: '1ª quinzena',
+                    cliente: 'Maria Santos',
+                    servico: 'BARBA',
+                    valor: 35,
+                    pagto: 'DÉBITO',
+                    comissao_jean: 17.5,
+                    comissao_reino_da_barba: 17.5,
+                    meta_mensal: 10000,
+                    meta_clientes: 200
+                },
+                {
+                    ano: 2024,
+                    mes: 11,
+                    dia: 2,
+                    dia_semana: 'sábado',
+                    quinzenas: '1ª quinzena',
+                    cliente: 'Pedro Costa',
+                    servico: 'COMBO CABELO+BARBA',
+                    valor: 70,
+                    pagto: 'CRÉDITO',
+                    comissao_jean: 35,
+                    comissao_reino_da_barba: 35,
+                    meta_mensal: 10000,
+                    meta_clientes: 200
+                }
+            ];
+            
+            const ws = XLSX.utils.json_to_sheet(templateData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Faturamento');
+            XLSX.writeFile(wb, 'template-reino-da-barba.xlsx');
+            
+            showSuccess('✅ Template baixado com sucesso! Preencha e faça upload.');
+        }
+
         // File Upload
         document.getElementById('file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
             
-            document.getElementById('loading-overlay').classList.add('show');
-            document.getElementById('error-message').classList.remove('show');
+            showLoading(true);
+            hideMessages();
             
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -591,11 +669,31 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    rawData = XLSX.utils.sheet_to_json(firstSheet);
+                    const allData = XLSX.utils.sheet_to_json(firstSheet);
                     
-                    if (rawData.length === 0) {
+                    if (allData.length === 0) {
                         throw new Error('O arquivo está vazio!');
                     }
+                    
+                    // Filter out "Meta" rows
+                    rawData = allData.filter(row => {
+                        const tipoLinha = row['Tipo de Linha'] || row['tipo_de_linha'] || '';
+                        return tipoLinha.toLowerCase() !== 'meta';
+                    });
+                    
+                    if (rawData.length === 0) {
+                        throw new Error('Nenhuma linha de faturamento encontrada (apenas linhas de Meta)!');
+                    }
+                    
+                    // Normalize column names
+                    rawData = rawData.map(row => {
+                        const normalized = {};
+                        Object.keys(row).forEach(key => {
+                            const lowerKey = key.toLowerCase().trim();
+                            normalized[lowerKey] = row[key];
+                        });
+                        return normalized;
+                    });
                     
                     // Validate required columns
                     const required = ['ano', 'mes', 'dia', 'dia_semana', 'quinzenas', 'cliente', 'servico', 'valor', 'pagto'];
@@ -605,31 +703,58 @@
                         throw new Error(`Colunas obrigatórias não encontradas: ${missing.join(', ')}`);
                     }
                     
-                    // Show file stats
-                    document.getElementById('file-stats').style.display = 'block';
-                    document.getElementById('file-stats').innerHTML = `
-                        ✅ Arquivo carregado: <strong>${file.name}</strong> | 
-                        ${rawData.length} registros | 
-                        ${cols.length} colunas
-                    `;
+                    // Clean data
+                    rawData = rawData.map(row => ({
+                        ano: Number(row.ano) || 0,
+                        mes: Number(row.mes) || 0,
+                        dia: Number(row.dia) || 0,
+                        dia_semana: String(row.dia_semana || '').toLowerCase(),
+                        quinzenas: String(row.quinzenas || ''),
+                        cliente: String(row.cliente || 'Sem nome'),
+                        servico: String(row.servico || 'Sem serviço'),
+                        valor: Number(row.valor) || 0,
+                        pagto: String(row.pagto || 'Não informado'),
+                        comissao_jean: Number(row.comissao_jean) || 0,
+                        comissao_reino_da_barba: Number(row.comissao_reino_da_barba) || 0,
+                        meta_mensal: Number(row.meta_mensal) || 0,
+                        meta_clientes: Number(row.meta_clientes) || 0
+                    }));
                     
                     filteredData = [...rawData];
                     populateFilters();
                     updateDashboard();
+                    
+                    showSuccess(`✅ Arquivo carregado com sucesso! ${rawData.length} registros processados.`);
                 } catch (error) {
                     showError(error.message);
                 } finally {
-                    document.getElementById('loading-overlay').classList.remove('show');
+                    showLoading(false);
                 }
             };
             reader.readAsArrayBuffer(file);
         });
 
+        function showLoading(show) {
+            document.getElementById('loading-overlay').classList.toggle('show', show);
+        }
+
         function showError(message) {
             const errorDiv = document.getElementById('error-message');
             errorDiv.textContent = '❌ Erro: ' + message;
             errorDiv.classList.add('show');
-            setTimeout(() => errorDiv.classList.remove('show'), 5000);
+            setTimeout(() => errorDiv.classList.remove('show'), 8000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = message;
+            successDiv.classList.add('show');
+            setTimeout(() => successDiv.classList.remove('show'), 5000);
+        }
+
+        function hideMessages() {
+            document.getElementById('error-message').classList.remove('show');
+            document.getElementById('success-message').classList.remove('show');
         }
 
         // Populate Filters
@@ -679,8 +804,6 @@
                 const diasSemana = Array.from(document.getElementById('filter-dia-semana').selectedOptions).map(o => o.value);
                 const servicos = Array.from(document.getElementById('filter-servico').selectedOptions).map(o => o.value);
                 const pagtos = Array.from(document.getElementById('filter-pagto').selectedOptions).map(o => o.value);
-                const dataInicio = document.getElementById('filter-data-inicio').value;
-                const dataFim = document.getElementById('filter-data-fim').value;
                 
                 if (anos.length && !anos.includes(row.ano)) return false;
                 if (meses.length && !meses.includes(row.mes)) return false;
@@ -688,12 +811,6 @@
                 if (diasSemana.length && !diasSemana.includes(row.dia_semana)) return false;
                 if (servicos.length && !servicos.includes(row.servico)) return false;
                 if (pagtos.length && !pagtos.includes(row.pagto)) return false;
-                
-                if (dataInicio || dataFim) {
-                    const rowDate = new Date(row.ano, row.mes - 1, row.dia);
-                    if (dataInicio && rowDate &lt; new Date(dataInicio)) return false;
-                    if (dataFim && rowDate > new Date(dataFim)) return false;
-                }
                 
                 return true;
             });
@@ -718,48 +835,48 @@
         // Update KPIs
         function updateKPIs() {
             const data = filteredData;
-            const totalReceita = data.reduce((sum, d) => sum + (d.valor || 0), 0);
+            const totalReceita = data.reduce((sum, d) => sum + d.valor, 0);
             const totalClientes = new Set(data.map(d => d.cliente)).size;
-            const ticketMedio = totalReceita / data.length;
-            const comissaoJean = data.reduce((sum, d) => sum + (d.comissao_jean || 0), 0);
-            const comissaoReino = data.reduce((sum, d) => sum + (d.comissao_reino_da_barba || 0), 0);
+            const ticketMedio = totalReceita / data.length || 0;
+            const comissaoJean = data.reduce((sum, d) => sum + d.comissao_jean, 0);
+            const comissaoReino = data.reduce((sum, d) => sum + d.comissao_reino_da_barba, 0);
             const metaMensal = data[0]?.meta_mensal || 0;
-            const atingimentoMeta = (totalReceita / metaMensal * 100).toFixed(1);
+            const atingimentoMeta = metaMensal > 0 ? (totalReceita / metaMensal * 100).toFixed(1) : 0;
             
             const kpisHTML = `
                 <div class="kpi-card">
-                    <div class="kpi-title">Total Receita</div>
+                    <div class="kpi-title">💰 Total Receita</div>
                     <div class="kpi-value">${formatCurrency(totalReceita)}</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">Ticket Médio</div>
+                    <div class="kpi-title">🎯 Ticket Médio</div>
                     <div class="kpi-value">${formatCurrency(ticketMedio)}</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">Total Clientes</div>
+                    <div class="kpi-title">👥 Total Clientes</div>
                     <div class="kpi-value">${totalClientes}</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">Atingimento Meta</div>
+                    <div class="kpi-title">📊 Atingimento Meta</div>
                     <div class="kpi-value">${atingimentoMeta}%</div>
                     <div class="kpi-change ${atingimentoMeta >= 100 ? 'positive' : 'negative'}">
                         ${atingimentoMeta >= 100 ? '✓ Meta atingida' : '⚠ Abaixo da meta'}
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">Comissão Jean</div>
+                    <div class="kpi-title">💵 Comissão Jean</div>
                     <div class="kpi-value">${formatCurrency(comissaoJean)}</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">Comissão Reino</div>
+                    <div class="kpi-title">💵 Comissão Reino</div>
                     <div class="kpi-value">${formatCurrency(comissaoReino)}</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">Atendimentos</div>
+                    <div class="kpi-title">📋 Atendimentos</div>
                     <div class="kpi-value">${data.length}</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">Meta Mensal</div>
+                    <div class="kpi-title">🎯 Meta Mensal</div>
                     <div class="kpi-value">${formatCurrency(metaMensal)}</div>
                 </div>
             `;
@@ -769,7 +886,6 @@
 
         // Create All Charts
         function createAllCharts() {
-            // Destroy old charts
             Object.values(charts).forEach(chart => {
                 if (chart && typeof chart.destroy === 'function') {
                     chart.destroy();
@@ -801,16 +917,14 @@
         function createRevenueGoalChart() {
             const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
             const labels = Object.keys(monthlyData).sort();
-            const revenues = labels.map(key => {
-                return monthlyData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
-            });
+            const revenues = labels.map(key => monthlyData[key].reduce((sum, d) => sum + d.valor, 0));
             const goals = labels.map(key => monthlyData[key][0]?.meta_mensal || 0);
             
             const ctx = document.getElementById('chart-revenue-goal').getContext('2d');
             charts.revenueGoal = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels.map(l => l.substring(5) + '/' + l.substring(0, 4)),
+                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(0, 4)),
                     datasets: [
                         {
                             label: 'Faturamento',
@@ -853,7 +967,7 @@
 
         // Chart 2: Goal Gauge
         function createGoalGaugeChart() {
-            const totalReceita = filteredData.reduce((sum, d) => sum + (d.valor || 0), 0);
+            const totalReceita = filteredData.reduce((sum, d) => sum + d.valor, 0);
             const metaMensal = filteredData[0]?.meta_mensal || 1;
             const percentage = Math.min((totalReceita / metaMensal * 100), 100);
             
@@ -889,9 +1003,7 @@
         function createServicesMixChart() {
             const servicesData = groupBy(filteredData, d => d.servico);
             const labels = Object.keys(servicesData);
-            const values = labels.map(key => {
-                return servicesData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
-            });
+            const values = labels.map(key => servicesData[key].reduce((sum, d) => sum + d.valor, 0));
             
             const ctx = document.getElementById('chart-services-mix').getContext('2d');
             charts.servicesMix = new Chart(ctx, {
@@ -925,7 +1037,7 @@
             const sorted = Object.entries(clientsData)
                 .map(([cliente, records]) => ({
                     cliente,
-                    valor: records.reduce((sum, d) => sum + (d.valor || 0), 0)
+                    valor: records.reduce((sum, d) => sum + d.valor, 0)
                 }))
                 .sort((a, b) => b.valor - a.valor)
                 .slice(0, 10);
@@ -967,10 +1079,10 @@
         // Chart 5: Revenue by Day of Week
         function createRevenueDayWeekChart() {
             const daysOrder = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
-            const daysData = groupBy(filteredData, d => d.dia_semana.toLowerCase());
+            const daysData = groupBy(filteredData, d => d.dia_semana);
             const data = daysOrder.map(day => {
                 const dayRecords = daysData[day] || [];
-                return dayRecords.reduce((sum, d) => sum + (d.valor || 0), 0);
+                return dayRecords.reduce((sum, d) => sum + d.valor, 0);
             });
             
             const ctx = document.getElementById('chart-revenue-day-week').getContext('2d');
@@ -1009,10 +1121,8 @@
         // Chart 6: Daily Productivity
         function createDailyProductivityChart() {
             const dailyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}-${String(d.dia).padStart(2, '0')}`);
-            const labels = Object.keys(dailyData).sort().slice(-30); // Last 30 days
-            const revenues = labels.map(key => {
-                return dailyData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
-            });
+            const labels = Object.keys(dailyData).sort().slice(-30);
+            const revenues = labels.map(key => dailyData[key].reduce((sum, d) => sum + d.valor, 0));
             
             const ctx = document.getElementById('chart-daily-productivity').getContext('2d');
             charts.dailyProductivity = new Chart(ctx, {
@@ -1064,9 +1174,8 @@
             });
             
             filteredData.forEach(d => {
-                const day = d.dia_semana.toLowerCase();
-                if (heatmapData[d.servico] && heatmapData[d.servico][day] !== undefined) {
-                    heatmapData[d.servico][day]++;
+                if (heatmapData[d.servico] && heatmapData[d.servico][d.dia_semana] !== undefined) {
+                    heatmapData[d.servico][d.dia_semana]++;
                 }
             });
             
@@ -1097,9 +1206,7 @@
         function createPaymentMethodsChart() {
             const paymentData = groupBy(filteredData, d => d.pagto);
             const labels = Object.keys(paymentData);
-            const values = labels.map(key => {
-                return paymentData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
-            });
+            const values = labels.map(key => paymentData[key].reduce((sum, d) => sum + d.valor, 0));
             
             const ctx = document.getElementById('chart-payment-methods').getContext('2d');
             charts.paymentMethods = new Chart(ctx, {
@@ -1133,7 +1240,7 @@
             const labels = Object.keys(servicesData);
             const avgTickets = labels.map(key => {
                 const records = servicesData[key];
-                const total = records.reduce((sum, d) => sum + (d.valor || 0), 0);
+                const total = records.reduce((sum, d) => sum + d.valor, 0);
                 return total / records.length;
             });
             
@@ -1174,9 +1281,7 @@
         function createRevenueFortnightChart() {
             const fortnightData = groupBy(filteredData, d => d.quinzenas);
             const labels = Object.keys(fortnightData).sort();
-            const revenues = labels.map(key => {
-                return fortnightData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
-            });
+            const revenues = labels.map(key => fortnightData[key].reduce((sum, d) => sum + d.valor, 0));
             
             const ctx = document.getElementById('chart-revenue-fortnight').getContext('2d');
             charts.revenueFortnight = new Chart(ctx, {
@@ -1221,7 +1326,7 @@
             const frequencies = Object.values(clientCounts);
             const histogram = {};
             frequencies.forEach(freq => {
-                const bucket = freq === 1 ? '1' : freq === 2 ? '2' : freq === 3 ? '3' : freq &lt;= 5 ? '4-5' : '6+';
+                const bucket = freq === 1 ? '1' : freq === 2 ? '2' : freq === 3 ? '3' : freq <= 5 ? '4-5' : '6+';
                 histogram[bucket] = (histogram[bucket] || 0) + 1;
             });
             
@@ -1253,7 +1358,7 @@
             });
         }
 
-        // Chart 12: New vs Recurring Clients
+        // Chart 12: New vs Recurring
         function createNewRecurringChart() {
             const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
             const labels = Object.keys(monthlyData).sort();
@@ -1264,15 +1369,19 @@
             
             labels.forEach(month => {
                 const monthRecords = monthlyData[month];
+                const monthClientsSet = new Set();
                 let newCount = 0;
                 let recurringCount = 0;
                 
                 monthRecords.forEach(d => {
-                    if (seenClients.has(d.cliente)) {
-                        recurringCount++;
-                    } else {
-                        newCount++;
-                        seenClients.add(d.cliente);
+                    if (!monthClientsSet.has(d.cliente)) {
+                        monthClientsSet.add(d.cliente);
+                        if (seenClients.has(d.cliente)) {
+                            recurringCount++;
+                        } else {
+                            newCount++;
+                            seenClients.add(d.cliente);
+                        }
                     }
                 });
                 
@@ -1284,7 +1393,7 @@
             charts.newRecurring = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels.map(l => l.substring(5) + '/' + l.substring(0, 4)),
+                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(0, 4)),
                     datasets: [
                         {
                             label: 'Novos',
@@ -1316,13 +1425,13 @@
             });
         }
 
-        // Chart 13: Pareto (ABC Curve)
+        // Chart 13: Pareto
         function createParetoChart() {
             const clientsData = groupBy(filteredData, d => d.cliente);
             const sorted = Object.entries(clientsData)
                 .map(([cliente, records]) => ({
                     cliente,
-                    valor: records.reduce((sum, d) => sum + (d.valor || 0), 0)
+                    valor: records.reduce((sum, d) => sum + d.valor, 0)
                 }))
                 .sort((a, b) => b.valor - a.valor);
             
@@ -1330,7 +1439,7 @@
             let cumulative = 0;
             const cumulativePercentages = sorted.map(d => {
                 cumulative += d.valor;
-                return (cumulative / totalRevenue * 100).toFixed(1);
+                return (cumulative / totalRevenue * 100);
             });
             
             const top20 = sorted.slice(0, Math.ceil(sorted.length * 0.2));
@@ -1378,7 +1487,7 @@
                             beginAtZero: true,
                             max: 100,
                             ticks: {
-                                callback: value => value + '%'
+                                callback: value => value.toFixed(0) + '%'
                             },
                             grid: {
                                 drawOnChartArea: false
@@ -1401,7 +1510,7 @@
                     label: type,
                     data: labels.map(month => {
                         const monthRecords = monthlyData[month].filter(d => d.pagto === type);
-                        return monthRecords.reduce((sum, d) => sum + (d.valor || 0), 0);
+                        return monthRecords.reduce((sum, d) => sum + d.valor, 0);
                     }),
                     borderColor: colors[index % colors.length],
                     backgroundColor: colors[index % colors.length] + '33',
@@ -1413,7 +1522,7 @@
             charts.paymentEvolution = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels.map(l => l.substring(5) + '/' + l.substring(0, 4)),
+                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(0, 4)),
                     datasets: datasets
                 },
                 options: {
@@ -1439,24 +1548,19 @@
             });
         }
 
-        // Chart 15: Commissions Distribution
+        // Chart 15: Commissions
         function createCommissionsChart() {
             const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
             const labels = Object.keys(monthlyData).sort();
             
-            const jeanData = labels.map(month => {
-                return monthlyData[month].reduce((sum, d) => sum + (d.comissao_jean || 0), 0);
-            });
-            
-            const reinoData = labels.map(month => {
-                return monthlyData[month].reduce((sum, d) => sum + (d.comissao_reino_da_barba || 0), 0);
-            });
+            const jeanData = labels.map(month => monthlyData[month].reduce((sum, d) => sum + d.comissao_jean, 0));
+            const reinoData = labels.map(month => monthlyData[month].reduce((sum, d) => sum + d.comissao_reino_da_barba, 0));
             
             const ctx = document.getElementById('chart-commissions').getContext('2d');
             charts.commissions = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels.map(l => l.substring(5) + '/' + l.substring(0, 4)),
+                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(0, 4)),
                     datasets: [
                         {
                             label: 'Jean',
@@ -1496,9 +1600,9 @@
             });
         }
 
-        // Chart 16: Goal Gap (Waterfall)
+        // Chart 16: Goal Gap
         function createGoalGapChart() {
-            const totalReceita = filteredData.reduce((sum, d) => sum + (d.valor || 0), 0);
+            const totalReceita = filteredData.reduce((sum, d) => sum + d.valor, 0);
             const metaMensal = filteredData[0]?.meta_mensal || 0;
             const gap = totalReceita - metaMensal;
             
@@ -1508,7 +1612,7 @@
                 data: {
                     labels: ['Meta', 'Realizado', 'Gap'],
                     datasets: [{
-                        data: [metaMensal, totalReceita, gap],
+                        data: [metaMensal, totalReceita, Math.abs(gap)],
                         backgroundColor: ['#64748b', '#2563eb', gap >= 0 ? '#10b981' : '#ef4444']
                     }]
                 },
@@ -1534,15 +1638,12 @@
             });
         }
 
-        // Chart 17: Seasonality with Moving Average
+        // Chart 17: Seasonality
         function createSeasonalityChart() {
             const dailyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}-${String(d.dia).padStart(2, '0')}`);
-            const labels = Object.keys(dailyData).sort().slice(-60); // Last 60 days
-            const revenues = labels.map(key => {
-                return dailyData[key].reduce((sum, d) => sum + (d.valor || 0), 0);
-            });
+            const labels = Object.keys(dailyData).sort().slice(-60);
+            const revenues = labels.map(key => dailyData[key].reduce((sum, d) => sum + d.valor, 0));
             
-            // Calculate 7-day moving average
             const movingAvg = revenues.map((_, index, arr) => {
                 const start = Math.max(0, index - 6);
                 const window = arr.slice(start, index + 1);
@@ -1593,7 +1694,7 @@
             });
         }
 
-        // Chart 18: Year over Year Comparison
+        // Chart 18: Year over Year
         function createYoYChart() {
             const years = [...new Set(filteredData.map(d => d.ano))].sort();
             const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -1604,7 +1705,7 @@
                     label: year.toString(),
                     data: months.map(month => {
                         const monthRecords = filteredData.filter(d => d.ano === year && d.mes === month);
-                        return monthRecords.reduce((sum, d) => sum + (d.valor || 0), 0);
+                        return monthRecords.reduce((sum, d) => sum + d.valor, 0);
                     }),
                     backgroundColor: colors[index % colors.length]
                 };
