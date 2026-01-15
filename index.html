@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Reino da Barba - Production Ready</title>
+    <title>Dashboard Reino da Barba - Completo</title>
     
     <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -380,12 +380,6 @@
         #file-input {
             display: none;
         }
-
-        .info-text {
-            font-size: 14px;
-            color: #64748b;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
@@ -406,7 +400,7 @@
                 <button class="btn-primary" onclick="document.getElementById('file-input').click()">
                     📁 Carregar Arquivo
                 </button>
-                <input type="file" id="file-input" accept=".xlsx,.xls,.csv">
+                <input type="file" id="file-input" accept=".xlsx,.xls">
             </div>
         </header>
 
@@ -441,14 +435,6 @@
                 <div class="filter-item">
                     <label>Forma de Pagamento</label>
                     <select id="filter-pagto" multiple></select>
-                </div>
-                <div class="filter-item">
-                    <label>Data Início</label>
-                    <input type="date" id="filter-data-inicio">
-                </div>
-                <div class="filter-item">
-                    <label>Data Fim</label>
-                    <input type="date" id="filter-data-fim">
                 </div>
             </div>
             <div style="margin-top: 15px; display: flex; gap: 10px;">
@@ -541,6 +527,22 @@
         <div id="tab-financeira" class="tab-content">
             <div class="charts-grid">
                 <div class="chart-container">
+                    <h3 class="chart-title">Faturamento vs Custos vs Lucro</h3>
+                    <canvas id="chart-profit-analysis"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Evolução de Custos</h3>
+                    <canvas id="chart-costs-evolution"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Custos por Categoria</h3>
+                    <canvas id="chart-costs-category"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Status de Pagamentos</h3>
+                    <canvas id="chart-payment-status"></canvas>
+                </div>
+                <div class="chart-container">
                     <h3 class="chart-title">Evolução de Pagamentos</h3>
                     <canvas id="chart-payment-evolution"></canvas>
                 </div>
@@ -548,26 +550,17 @@
                     <h3 class="chart-title">Distribuição de Comissões</h3>
                     <canvas id="chart-commissions"></canvas>
                 </div>
-                <div class="chart-container">
-                    <h3 class="chart-title">Gap de Meta</h3>
-                    <canvas id="chart-goal-gap"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3 class="chart-title">Sazonalidade com Média Móvel</h3>
-                    <canvas id="chart-seasonality"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3 class="chart-title">Comparação Ano a Ano</h3>
-                    <canvas id="chart-yoy"></canvas>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
         // Global Variables
-        let rawData = [];
-        let filteredData = [];
+        let faturamentoData = [];
+        let metasData = [];
+        let custosData = [];
+        let filteredFaturamento = [];
+        let filteredCustos = [];
         let charts = {};
         
         // Theme Toggle
@@ -576,7 +569,7 @@
             const isDark = document.body.classList.contains('dark-mode');
             this.textContent = isDark ? '☀️ Modo Claro' : '🌙 Modo Escuro';
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            if (rawData.length > 0) {
+            if (faturamentoData.length > 0) {
                 createAllCharts();
             }
         });
@@ -599,7 +592,8 @@
 
         // Download Template
         function downloadTemplate() {
-            const templateData = [
+            // Aba 1: Faturamento
+            const faturamentoSheet = [
                 {
                     ano: 2024,
                     mes: 11,
@@ -611,9 +605,7 @@
                     valor: 45,
                     pagto: 'PIX',
                     comissao_jean: 22.5,
-                    comissao_reino_da_barba: 22.5,
-                    meta_mensal: 10000,
-                    meta_clientes: 200
+                    comissao_reino_da_barba: 22.5
                 },
                 {
                     ano: 2024,
@@ -626,9 +618,7 @@
                     valor: 35,
                     pagto: 'DÉBITO',
                     comissao_jean: 17.5,
-                    comissao_reino_da_barba: 17.5,
-                    meta_mensal: 10000,
-                    meta_clientes: 200
+                    comissao_reino_da_barba: 17.5
                 },
                 {
                     ano: 2024,
@@ -641,18 +631,68 @@
                     valor: 70,
                     pagto: 'CRÉDITO',
                     comissao_jean: 35,
-                    comissao_reino_da_barba: 35,
-                    meta_mensal: 10000,
-                    meta_clientes: 200
+                    comissao_reino_da_barba: 35
+                }
+            ];
+
+            // Aba 2: Metas
+            const metasSheet = [
+                {
+                    ano: 2024,
+                    mes: 11,
+                    meta_cliente: 200,
+                    meta_faturamento: 10000
+                },
+                {
+                    ano: 2024,
+                    mes: 12,
+                    meta_cliente: 220,
+                    meta_faturamento: 12000
+                }
+            ];
+
+            // Aba 3: Custos
+            const custosSheet = [
+                {
+                    ano: 2024,
+                    mes: 11,
+                    nome_despesa: 'Aluguel',
+                    vencimento: '10/11/2024',
+                    valor: 2000,
+                    status_pagto: 'PAGO'
+                },
+                {
+                    ano: 2024,
+                    mes: 11,
+                    nome_despesa: 'Energia',
+                    vencimento: '15/11/2024',
+                    valor: 350,
+                    status_pagto: 'PENDENTE'
+                },
+                {
+                    ano: 2024,
+                    mes: 11,
+                    nome_despesa: 'Produtos',
+                    vencimento: '20/11/2024',
+                    valor: 800,
+                    status_pagto: 'PAGO'
                 }
             ];
             
-            const ws = XLSX.utils.json_to_sheet(templateData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Faturamento');
+            
+            const ws1 = XLSX.utils.json_to_sheet(faturamentoSheet);
+            XLSX.utils.book_append_sheet(wb, ws1, 'Faturamento');
+            
+            const ws2 = XLSX.utils.json_to_sheet(metasSheet);
+            XLSX.utils.book_append_sheet(wb, ws2, 'Metas');
+            
+            const ws3 = XLSX.utils.json_to_sheet(custosSheet);
+            XLSX.utils.book_append_sheet(wb, ws3, 'Custos');
+            
             XLSX.writeFile(wb, 'template-reino-da-barba.xlsx');
             
-            showSuccess('✅ Template baixado com sucesso! Preencha e faça upload.');
+            showSuccess('✅ Template baixado com sucesso! Preencha as 3 abas: Faturamento, Metas e Custos.');
         }
 
         // File Upload
@@ -668,63 +708,93 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const allData = XLSX.utils.sheet_to_json(firstSheet);
                     
-                    if (allData.length === 0) {
-                        throw new Error('O arquivo está vazio!');
+                    // Validate sheets
+                    const sheetNames = workbook.SheetNames;
+                    if (!sheetNames.includes('Faturamento')) {
+                        throw new Error('Aba "Faturamento" não encontrada! Use o template.');
+                    }
+                    if (!sheetNames.includes('Metas')) {
+                        throw new Error('Aba "Metas" não encontrada! Use o template.');
+                    }
+                    if (!sheetNames.includes('Custos')) {
+                        throw new Error('Aba "Custos" não encontrada! Use o template.');
                     }
                     
-                    // Filter out "Meta" rows
-                    rawData = allData.filter(row => {
-                        const tipoLinha = row['Tipo de Linha'] || row['tipo_de_linha'] || '';
-                        return tipoLinha.toLowerCase() !== 'meta';
-                    });
+                    // Read sheets
+                    const faturamentoSheet = workbook.Sheets['Faturamento'];
+                    const metasSheet = workbook.Sheets['Metas'];
+                    const custosSheet = workbook.Sheets['Custos'];
                     
-                    if (rawData.length === 0) {
-                        throw new Error('Nenhuma linha de faturamento encontrada (apenas linhas de Meta)!');
+                    faturamentoData = XLSX.utils.sheet_to_json(faturamentoSheet);
+                    metasData = XLSX.utils.sheet_to_json(metasSheet);
+                    custosData = XLSX.utils.sheet_to_json(custosSheet);
+                    
+                    if (faturamentoData.length === 0) {
+                        throw new Error('Aba "Faturamento" está vazia!');
                     }
                     
-                    // Normalize column names
-                    rawData = rawData.map(row => {
+                    // Normalize faturamento
+                    faturamentoData = faturamentoData.map(row => {
                         const normalized = {};
                         Object.keys(row).forEach(key => {
                             const lowerKey = key.toLowerCase().trim();
                             normalized[lowerKey] = row[key];
                         });
-                        return normalized;
+                        return {
+                            ano: Number(normalized.ano) || 0,
+                            mes: Number(normalized.mes) || 0,
+                            dia: Number(normalized.dia) || 0,
+                            dia_semana: String(normalized.dia_semana || '').toLowerCase(),
+                            quinzenas: String(normalized.quinzenas || ''),
+                            cliente: String(normalized.cliente || 'Sem nome'),
+                            servico: String(normalized.servico || 'Sem serviço'),
+                            valor: Number(normalized.valor) || 0,
+                            pagto: String(normalized.pagto || 'Não informado'),
+                            comissao_jean: Number(normalized.comissao_jean) || 0,
+                            comissao_reino_da_barba: Number(normalized.comissao_reino_da_barba) || 0
+                        };
                     });
                     
-                    // Validate required columns
-                    const required = ['ano', 'mes', 'dia', 'dia_semana', 'quinzenas', 'cliente', 'servico', 'valor', 'pagto'];
-                    const cols = Object.keys(rawData[0]);
-                    const missing = required.filter(col => !cols.includes(col));
-                    if (missing.length > 0) {
-                        throw new Error(`Colunas obrigatórias não encontradas: ${missing.join(', ')}`);
-                    }
+                    // Normalize metas
+                    metasData = metasData.map(row => {
+                        const normalized = {};
+                        Object.keys(row).forEach(key => {
+                            const lowerKey = key.toLowerCase().trim();
+                            normalized[lowerKey] = row[key];
+                        });
+                        return {
+                            ano: Number(normalized.ano) || 0,
+                            mes: Number(normalized.mes) || 0,
+                            meta_cliente: Number(normalized.meta_cliente) || 0,
+                            meta_faturamento: Number(normalized.meta_faturamento) || 0
+                        };
+                    });
                     
-                    // Clean data
-                    rawData = rawData.map(row => ({
-                        ano: Number(row.ano) || 0,
-                        mes: Number(row.mes) || 0,
-                        dia: Number(row.dia) || 0,
-                        dia_semana: String(row.dia_semana || '').toLowerCase(),
-                        quinzenas: String(row.quinzenas || ''),
-                        cliente: String(row.cliente || 'Sem nome'),
-                        servico: String(row.servico || 'Sem serviço'),
-                        valor: Number(row.valor) || 0,
-                        pagto: String(row.pagto || 'Não informado'),
-                        comissao_jean: Number(row.comissao_jean) || 0,
-                        comissao_reino_da_barba: Number(row.comissao_reino_da_barba) || 0,
-                        meta_mensal: Number(row.meta_mensal) || 0,
-                        meta_clientes: Number(row.meta_clientes) || 0
-                    }));
+                    // Normalize custos
+                    custosData = custosData.map(row => {
+                        const normalized = {};
+                        Object.keys(row).forEach(key => {
+                            const lowerKey = key.toLowerCase().trim();
+                            normalized[lowerKey] = row[key];
+                        });
+                        return {
+                            ano: Number(normalized.ano) || 0,
+                            mes: Number(normalized.mes) || 0,
+                            nome_despesa: String(normalized.nome_despesa || 'Sem nome'),
+                            vencimento: String(normalized.vencimento || ''),
+                            valor: Number(normalized.valor) || 0,
+                            status_pagto: String(normalized.status_pagto || 'PENDENTE').toUpperCase()
+                        };
+                    });
                     
-                    filteredData = [...rawData];
+                    filteredFaturamento = [...faturamentoData];
+                    filteredCustos = [...custosData];
+                    
                     populateFilters();
                     updateDashboard();
                     
-                    showSuccess(`✅ Arquivo carregado com sucesso! ${rawData.length} registros processados.`);
+                    showSuccess(`✅ Arquivo carregado! ${faturamentoData.length} faturamentos, ${metasData.length} metas, ${custosData.length} custos.`);
                 } catch (error) {
                     showError(error.message);
                 } finally {
@@ -759,12 +829,12 @@
 
         // Populate Filters
         function populateFilters() {
-            const anos = [...new Set(rawData.map(d => d.ano))].sort();
-            const meses = [...new Set(rawData.map(d => d.mes))].sort((a, b) => a - b);
-            const quinzenas = [...new Set(rawData.map(d => d.quinzenas))].sort();
-            const diasSemana = [...new Set(rawData.map(d => d.dia_semana))];
-            const servicos = [...new Set(rawData.map(d => d.servico))];
-            const pagtos = [...new Set(rawData.map(d => d.pagto))];
+            const anos = [...new Set(faturamentoData.map(d => d.ano))].sort();
+            const meses = [...new Set(faturamentoData.map(d => d.mes))].sort((a, b) => a - b);
+            const quinzenas = [...new Set(faturamentoData.map(d => d.quinzenas))].sort();
+            const diasSemana = [...new Set(faturamentoData.map(d => d.dia_semana))];
+            const servicos = [...new Set(faturamentoData.map(d => d.servico))];
+            const pagtos = [...new Set(faturamentoData.map(d => d.pagto))];
             
             populateSelect('filter-ano', anos);
             populateSelect('filter-mes', meses.map(m => ({value: m, label: getMonthName(m)})));
@@ -797,7 +867,7 @@
 
         // Apply Filters
         function applyFilters() {
-            filteredData = rawData.filter(row => {
+            filteredFaturamento = faturamentoData.filter(row => {
                 const anos = Array.from(document.getElementById('filter-ano').selectedOptions).map(o => Number(o.value));
                 const meses = Array.from(document.getElementById('filter-mes').selectedOptions).map(o => Number(o.value));
                 const quinzenas = Array.from(document.getElementById('filter-quinzena').selectedOptions).map(o => o.value);
@@ -814,16 +884,31 @@
                 
                 return true;
             });
+
+            filteredCustos = custosData.filter(row => {
+                const anos = Array.from(document.getElementById('filter-ano').selectedOptions).map(o => Number(o.value));
+                const meses = Array.from(document.getElementById('filter-mes').selectedOptions).map(o => Number(o.value));
+                
+                if (anos.length && !anos.includes(row.ano)) return false;
+                if (meses.length && !meses.includes(row.mes)) return false;
+                
+                return true;
+            });
             
             updateDashboard();
         }
 
         function clearFilters() {
             document.querySelectorAll('select').forEach(s => s.selectedIndex = -1);
-            document.getElementById('filter-data-inicio').value = '';
-            document.getElementById('filter-data-fim').value = '';
-            filteredData = [...rawData];
+            filteredFaturamento = [...faturamentoData];
+            filteredCustos = [...custosData];
             updateDashboard();
+        }
+
+        // Get Meta for Period
+        function getMetaForPeriod(ano, mes) {
+            const meta = metasData.find(m => m.ano === ano && m.mes === mes);
+            return meta || { meta_cliente: 0, meta_faturamento: 0 };
         }
 
         // Update Dashboard
@@ -834,19 +919,46 @@
 
         // Update KPIs
         function updateKPIs() {
-            const data = filteredData;
-            const totalReceita = data.reduce((sum, d) => sum + d.valor, 0);
-            const totalClientes = new Set(data.map(d => d.cliente)).size;
-            const ticketMedio = totalReceita / data.length || 0;
-            const comissaoJean = data.reduce((sum, d) => sum + d.comissao_jean, 0);
-            const comissaoReino = data.reduce((sum, d) => sum + d.comissao_reino_da_barba, 0);
-            const metaMensal = data[0]?.meta_mensal || 0;
-            const atingimentoMeta = metaMensal > 0 ? (totalReceita / metaMensal * 100).toFixed(1) : 0;
+            const totalReceita = filteredFaturamento.reduce((sum, d) => sum + d.valor, 0);
+            const totalClientes = new Set(filteredFaturamento.map(d => d.cliente)).size;
+            const ticketMedio = totalReceita / filteredFaturamento.length || 0;
+            const comissaoJean = filteredFaturamento.reduce((sum, d) => sum + d.comissao_jean, 0);
+            const comissaoReino = filteredFaturamento.reduce((sum, d) => sum + d.comissao_reino_da_barba, 0);
+            
+            const totalCustos = filteredCustos.reduce((sum, d) => sum + d.valor, 0);
+            const custosPendentes = filteredCustos.filter(d => d.status_pagto === 'PENDENTE').reduce((sum, d) => sum + d.valor, 0);
+            const lucroLiquido = totalReceita - totalCustos;
+            const margemLiquida = totalReceita > 0 ? (lucroLiquido / totalReceita * 100).toFixed(1) : 0;
+            
+            // Calculate meta achievement
+            const uniquePeriods = [...new Set(filteredFaturamento.map(d => `${d.ano}-${d.mes}`))];
+            let totalMetaFaturamento = 0;
+            uniquePeriods.forEach(period => {
+                const [ano, mes] = period.split('-').map(Number);
+                const meta = getMetaForPeriod(ano, mes);
+                totalMetaFaturamento += meta.meta_faturamento;
+            });
+            const atingimentoMeta = totalMetaFaturamento > 0 ? (totalReceita / totalMetaFaturamento * 100).toFixed(1) : 0;
             
             const kpisHTML = `
                 <div class="kpi-card">
                     <div class="kpi-title">💰 Total Receita</div>
                     <div class="kpi-value">${formatCurrency(totalReceita)}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">💸 Total Custos</div>
+                    <div class="kpi-value" style="color: var(--danger);">${formatCurrency(totalCustos)}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">💵 Lucro Líquido</div>
+                    <div class="kpi-value" style="color: ${lucroLiquido >= 0 ? 'var(--success)' : 'var(--danger)'};">${formatCurrency(lucroLiquido)}</div>
+                    <div class="kpi-change ${lucroLiquido >= 0 ? 'positive' : 'negative'}">
+                        Margem: ${margemLiquida}%
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">⚠️ Custos Pendentes</div>
+                    <div class="kpi-value" style="color: var(--warning);">${formatCurrency(custosPendentes)}</div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-title">🎯 Ticket Médio</div>
@@ -864,20 +976,8 @@
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">💵 Comissão Jean</div>
-                    <div class="kpi-value">${formatCurrency(comissaoJean)}</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-title">💵 Comissão Reino</div>
-                    <div class="kpi-value">${formatCurrency(comissaoReino)}</div>
-                </div>
-                <div class="kpi-card">
                     <div class="kpi-title">📋 Atendimentos</div>
-                    <div class="kpi-value">${data.length}</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-title">🎯 Meta Mensal</div>
-                    <div class="kpi-value">${formatCurrency(metaMensal)}</div>
+                    <div class="kpi-value">${filteredFaturamento.length}</div>
                 </div>
             `;
             
@@ -893,38 +993,50 @@
             });
             charts = {};
             
+            // Executiva
             createRevenueGoalChart();
             createGoalGaugeChart();
             createServicesMixChart();
             createTopClientsChart();
+            
+            // Operacional
             createRevenueDayWeekChart();
             createDailyProductivityChart();
             createServicesHeatmap();
             createPaymentMethodsChart();
             createAvgTicketChart();
             createRevenueFortnightChart();
+            
+            // Clientes
             createClientFrequencyChart();
             createNewRecurringChart();
             createParetoChart();
+            
+            // Financeira
+            createProfitAnalysisChart();
+            createCostsEvolutionChart();
+            createCostsCategoryChart();
+            createPaymentStatusChart();
             createPaymentEvolutionChart();
             createCommissionsChart();
-            createGoalGapChart();
-            createSeasonalityChart();
-            createYoYChart();
         }
 
         // Chart 1: Revenue vs Goal
         function createRevenueGoalChart() {
-            const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const monthlyData = groupBy(filteredFaturamento, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
             const labels = Object.keys(monthlyData).sort();
             const revenues = labels.map(key => monthlyData[key].reduce((sum, d) => sum + d.valor, 0));
-            const goals = labels.map(key => monthlyData[key][0]?.meta_mensal || 0);
+            const goals = labels.map(key => {
+                const [ano, mes] = key.split('-').map(Number);
+                const meta = getMetaForPeriod(ano, mes);
+                return meta.meta_faturamento;
+            });
             
             const ctx = document.getElementById('chart-revenue-goal').getContext('2d');
             charts.revenueGoal = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(0, 4)),
+                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(2, 4)),
                     datasets: [
                         {
                             label: 'Faturamento',
@@ -967,9 +1079,15 @@
 
         // Chart 2: Goal Gauge
         function createGoalGaugeChart() {
-            const totalReceita = filteredData.reduce((sum, d) => sum + d.valor, 0);
-            const metaMensal = filteredData[0]?.meta_mensal || 1;
-            const percentage = Math.min((totalReceita / metaMensal * 100), 100);
+            const totalReceita = filteredFaturamento.reduce((sum, d) => sum + d.valor, 0);
+            const uniquePeriods = [...new Set(filteredFaturamento.map(d => `${d.ano}-${d.mes}`))];
+            let totalMetaFaturamento = 0;
+            uniquePeriods.forEach(period => {
+                const [ano, mes] = period.split('-').map(Number);
+                const meta = getMetaForPeriod(ano, mes);
+                totalMetaFaturamento += meta.meta_faturamento;
+            });
+            const percentage = totalMetaFaturamento > 0 ? Math.min((totalReceita / totalMetaFaturamento * 100), 100) : 0;
             
             const ctx = document.getElementById('chart-goal-gauge').getContext('2d');
             charts.goalGauge = new Chart(ctx, {
@@ -1001,7 +1119,7 @@
 
         // Chart 3: Services Mix
         function createServicesMixChart() {
-            const servicesData = groupBy(filteredData, d => d.servico);
+            const servicesData = groupBy(filteredFaturamento, d => d.servico);
             const labels = Object.keys(servicesData);
             const values = labels.map(key => servicesData[key].reduce((sum, d) => sum + d.valor, 0));
             
@@ -1012,7 +1130,7 @@
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444'],
+                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
                         borderWidth: 2,
                         borderColor: '#fff'
                     }]
@@ -1033,7 +1151,7 @@
 
         // Chart 4: Top Clients
         function createTopClientsChart() {
-            const clientsData = groupBy(filteredData, d => d.cliente);
+            const clientsData = groupBy(filteredFaturamento, d => d.cliente);
             const sorted = Object.entries(clientsData)
                 .map(([cliente, records]) => ({
                     cliente,
@@ -1079,7 +1197,7 @@
         // Chart 5: Revenue by Day of Week
         function createRevenueDayWeekChart() {
             const daysOrder = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
-            const daysData = groupBy(filteredData, d => d.dia_semana);
+            const daysData = groupBy(filteredFaturamento, d => d.dia_semana);
             const data = daysOrder.map(day => {
                 const dayRecords = daysData[day] || [];
                 return dayRecords.reduce((sum, d) => sum + d.valor, 0);
@@ -1120,7 +1238,7 @@
 
         // Chart 6: Daily Productivity
         function createDailyProductivityChart() {
-            const dailyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}-${String(d.dia).padStart(2, '0')}`);
+            const dailyData = groupBy(filteredFaturamento, d => `${d.ano}-${String(d.mes).padStart(2, '0')}-${String(d.dia).padStart(2, '0')}`);
             const labels = Object.keys(dailyData).sort().slice(-30);
             const revenues = labels.map(key => dailyData[key].reduce((sum, d) => sum + d.valor, 0));
             
@@ -1163,7 +1281,7 @@
         // Chart 7: Services Heatmap
         function createServicesHeatmap() {
             const daysOrder = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
-            const servicos = [...new Set(filteredData.map(d => d.servico))];
+            const servicos = [...new Set(filteredFaturamento.map(d => d.servico))];
             
             const heatmapData = {};
             servicos.forEach(servico => {
@@ -1173,7 +1291,7 @@
                 });
             });
             
-            filteredData.forEach(d => {
+            filteredFaturamento.forEach(d => {
                 if (heatmapData[d.servico] && heatmapData[d.servico][d.dia_semana] !== undefined) {
                     heatmapData[d.servico][d.dia_semana]++;
                 }
@@ -1204,7 +1322,7 @@
 
         // Chart 8: Payment Methods
         function createPaymentMethodsChart() {
-            const paymentData = groupBy(filteredData, d => d.pagto);
+            const paymentData = groupBy(filteredFaturamento, d => d.pagto);
             const labels = Object.keys(paymentData);
             const values = labels.map(key => paymentData[key].reduce((sum, d) => sum + d.valor, 0));
             
@@ -1236,7 +1354,7 @@
 
         // Chart 9: Average Ticket by Service
         function createAvgTicketChart() {
-            const servicesData = groupBy(filteredData, d => d.servico);
+            const servicesData = groupBy(filteredFaturamento, d => d.servico);
             const labels = Object.keys(servicesData);
             const avgTickets = labels.map(key => {
                 const records = servicesData[key];
@@ -1279,7 +1397,7 @@
 
         // Chart 10: Revenue by Fortnight
         function createRevenueFortnightChart() {
-            const fortnightData = groupBy(filteredData, d => d.quinzenas);
+            const fortnightData = groupBy(filteredFaturamento, d => d.quinzenas);
             const labels = Object.keys(fortnightData).sort();
             const revenues = labels.map(key => fortnightData[key].reduce((sum, d) => sum + d.valor, 0));
             
@@ -1319,14 +1437,14 @@
         // Chart 11: Client Frequency
         function createClientFrequencyChart() {
             const clientCounts = {};
-            filteredData.forEach(d => {
+            filteredFaturamento.forEach(d => {
                 clientCounts[d.cliente] = (clientCounts[d.cliente] || 0) + 1;
             });
             
             const frequencies = Object.values(clientCounts);
             const histogram = {};
             frequencies.forEach(freq => {
-                const bucket = freq === 1 ? '1' : freq === 2 ? '2' : freq === 3 ? '3' : freq &lt;= 5 ? '4-5' : '6+';
+                const bucket = freq === 1 ? '1' : freq === 2 ? '2' : freq === 3 ? '3' : freq <= 5 ? '4-5' : '6+';
                 histogram[bucket] = (histogram[bucket] || 0) + 1;
             });
             
@@ -1360,7 +1478,7 @@
 
         // Chart 12: New vs Recurring
         function createNewRecurringChart() {
-            const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const monthlyData = groupBy(filteredFaturamento, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
             const labels = Object.keys(monthlyData).sort();
             
             const seenClients = new Set();
@@ -1393,7 +1511,7 @@
             charts.newRecurring = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(0, 4)),
+                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(2, 4)),
                     datasets: [
                         {
                             label: 'Novos',
@@ -1427,7 +1545,7 @@
 
         // Chart 13: Pareto
         function createParetoChart() {
-            const clientsData = groupBy(filteredData, d => d.cliente);
+            const clientsData = groupBy(filteredFaturamento, d => d.cliente);
             const sorted = Object.entries(clientsData)
                 .map(([cliente, records]) => ({
                     cliente,
@@ -1442,7 +1560,7 @@
                 return (cumulative / totalRevenue * 100);
             });
             
-            const top20 = sorted.slice(0, Math.ceil(sorted.length * 0.2));
+            const top20 = sorted.slice(0, Math.max(Math.ceil(sorted.length * 0.2), 10));
             
             const ctx = document.getElementById('chart-pareto').getContext('2d');
             charts.pareto = new Chart(ctx, {
@@ -1498,11 +1616,179 @@
             });
         }
 
-        // Chart 14: Payment Evolution
+        // Chart 14: Profit Analysis
+        function createProfitAnalysisChart() {
+            const monthlyFaturamento = groupBy(filteredFaturamento, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const monthlyCustos = groupBy(filteredCustos, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            
+            const allMonths = [...new Set([...Object.keys(monthlyFaturamento), ...Object.keys(monthlyCustos)])].sort();
+            
+            const revenues = allMonths.map(month => {
+                return (monthlyFaturamento[month] || []).reduce((sum, d) => sum + d.valor, 0);
+            });
+            
+            const costs = allMonths.map(month => {
+                return (monthlyCustos[month] || []).reduce((sum, d) => sum + d.valor, 0);
+            });
+            
+            const profits = revenues.map((rev, i) => rev - costs[i]);
+            
+            const ctx = document.getElementById('chart-profit-analysis').getContext('2d');
+            charts.profitAnalysis = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: allMonths.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(2, 4)),
+                    datasets: [
+                        {
+                            label: 'Faturamento',
+                            data: revenues,
+                            backgroundColor: '#2563eb'
+                        },
+                        {
+                            label: 'Custos',
+                            data: costs,
+                            backgroundColor: '#ef4444'
+                        },
+                        {
+                            label: 'Lucro',
+                            data: profits,
+                            backgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true },
+                        tooltip: {
+                            callbacks: {
+                                label: context => context.dataset.label + ': ' + formatCurrency(context.parsed.y)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => formatCurrency(value)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 15: Costs Evolution
+        function createCostsEvolutionChart() {
+            const monthlyCustos = groupBy(filteredCustos, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const labels = Object.keys(monthlyCustos).sort();
+            const costs = labels.map(month => monthlyCustos[month].reduce((sum, d) => sum + d.valor, 0));
+            
+            const ctx = document.getElementById('chart-costs-evolution').getContext('2d');
+            charts.costsEvolution = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(2, 4)),
+                    datasets: [{
+                        label: 'Custos Mensais',
+                        data: costs,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: context => formatCurrency(context.parsed.y)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => formatCurrency(value)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 16: Costs by Category
+        function createCostsCategoryChart() {
+            const categoryData = groupBy(filteredCustos, d => d.nome_despesa);
+            const labels = Object.keys(categoryData);
+            const values = labels.map(key => categoryData[key].reduce((sum, d) => sum + d.valor, 0));
+            
+            const ctx = document.getElementById('chart-costs-category').getContext('2d');
+            charts.costsCategory = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: ['#ef4444', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: context => context.label + ': ' + formatCurrency(context.parsed)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 17: Payment Status
+        function createPaymentStatusChart() {
+            const statusData = groupBy(filteredCustos, d => d.status_pagto);
+            const labels = Object.keys(statusData);
+            const values = labels.map(key => statusData[key].reduce((sum, d) => sum + d.valor, 0));
+            
+            const ctx = document.getElementById('chart-payment-status').getContext('2d');
+            charts.paymentStatus = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: ['#10b981', '#f59e0b'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: context => context.label + ': ' + formatCurrency(context.parsed)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 18: Payment Evolution
         function createPaymentEvolutionChart() {
-            const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const monthlyData = groupBy(filteredFaturamento, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
             const labels = Object.keys(monthlyData).sort();
-            const paymentTypes = [...new Set(filteredData.map(d => d.pagto))];
+            const paymentTypes = [...new Set(filteredFaturamento.map(d => d.pagto))];
             
             const datasets = paymentTypes.map((type, index) => {
                 const colors = ['#2563eb', '#10b981', '#f59e0b'];
@@ -1522,7 +1808,7 @@
             charts.paymentEvolution = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(0, 4)),
+                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(2, 4)),
                     datasets: datasets
                 },
                 options: {
@@ -1548,9 +1834,9 @@
             });
         }
 
-        // Chart 15: Commissions
+        // Chart 19: Commissions
         function createCommissionsChart() {
-            const monthlyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
+            const monthlyData = groupBy(filteredFaturamento, d => `${d.ano}-${String(d.mes).padStart(2, '0')}`);
             const labels = Object.keys(monthlyData).sort();
             
             const jeanData = labels.map(month => monthlyData[month].reduce((sum, d) => sum + d.comissao_jean, 0));
@@ -1560,7 +1846,7 @@
             charts.commissions = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(0, 4)),
+                    labels: labels.map(l => getMonthName(Number(l.substring(5))) + '/' + l.substring(2, 4)),
                     datasets: [
                         {
                             label: 'Jean',
@@ -1590,146 +1876,6 @@
                         },
                         y: {
                             stacked: true,
-                            beginAtZero: true,
-                            ticks: {
-                                callback: value => formatCurrency(value)
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Chart 16: Goal Gap
-        function createGoalGapChart() {
-            const totalReceita = filteredData.reduce((sum, d) => sum + d.valor, 0);
-            const metaMensal = filteredData[0]?.meta_mensal || 0;
-            const gap = totalReceita - metaMensal;
-            
-            const ctx = document.getElementById('chart-goal-gap').getContext('2d');
-            charts.goalGap = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Meta', 'Realizado', 'Gap'],
-                    datasets: [{
-                        data: [metaMensal, totalReceita, Math.abs(gap)],
-                        backgroundColor: ['#64748b', '#2563eb', gap >= 0 ? '#10b981' : '#ef4444']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: context => formatCurrency(context.parsed.y)
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: value => formatCurrency(value)
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Chart 17: Seasonality
-        function createSeasonalityChart() {
-            const dailyData = groupBy(filteredData, d => `${d.ano}-${String(d.mes).padStart(2, '0')}-${String(d.dia).padStart(2, '0')}`);
-            const labels = Object.keys(dailyData).sort().slice(-60);
-            const revenues = labels.map(key => dailyData[key].reduce((sum, d) => sum + d.valor, 0));
-            
-            const movingAvg = revenues.map((_, index, arr) => {
-                const start = Math.max(0, index - 6);
-                const window = arr.slice(start, index + 1);
-                return window.reduce((sum, val) => sum + val, 0) / window.length;
-            });
-            
-            const ctx = document.getElementById('chart-seasonality').getContext('2d');
-            charts.seasonality = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels.map(l => l.substring(8) + '/' + l.substring(5, 7)),
-                    datasets: [
-                        {
-                            label: 'Receita Diária',
-                            data: revenues,
-                            borderColor: '#cbd5e1',
-                            backgroundColor: 'transparent',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Média Móvel (7 dias)',
-                            data: movingAvg,
-                            borderColor: '#2563eb',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true },
-                        tooltip: {
-                            callbacks: {
-                                label: context => context.dataset.label + ': ' + formatCurrency(context.parsed.y)
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: value => formatCurrency(value)
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Chart 18: Year over Year
-        function createYoYChart() {
-            const years = [...new Set(filteredData.map(d => d.ano))].sort();
-            const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-            
-            const datasets = years.map((year, index) => {
-                const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444'];
-                return {
-                    label: year.toString(),
-                    data: months.map(month => {
-                        const monthRecords = filteredData.filter(d => d.ano === year && d.mes === month);
-                        return monthRecords.reduce((sum, d) => sum + d.valor, 0);
-                    }),
-                    backgroundColor: colors[index % colors.length]
-                };
-            });
-            
-            const ctx = document.getElementById('chart-yoy').getContext('2d');
-            charts.yoy = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: months.map(m => getMonthName(m)),
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true },
-                        tooltip: {
-                            callbacks: {
-                                label: context => context.dataset.label + ': ' + formatCurrency(context.parsed.y)
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
                             beginAtZero: true,
                             ticks: {
                                 callback: value => formatCurrency(value)
